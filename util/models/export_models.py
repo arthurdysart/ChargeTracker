@@ -68,9 +68,12 @@ def serialize_export(splines):
     """
     Serializes splines as PICKLE file and exports to "models" directory.
     """
-    with open("models_charge_discharge.pk", "w") as pickled_models:
-        pk.dump(tuple(splines), pickled_models)
-    dir_export = pth.join(os.getcwd(), "models_charge_discharge.pk")
+    try:
+        with open("models_charge_discharge.pk", "wb") as pickled_models:
+            pk.dump(tuple(splines), pickled_models)
+        dir_export = pth.join(os.getcwd(), "models_charge_discharge.pk")
+    except:
+        raise OSError("Cannot export model. Check serialization protocol.")
     return dir_export
 
 
@@ -79,7 +82,6 @@ if __name__ == "__main__":
     model_paths = stdin(sys.argv)
     data = [read_csv(path) for path in model_paths]
     splines = [create_spline(dataset) for dataset in data]
-    print("{}\n{}\n".format(splines[0](0.463), splines[1](0.121)))
     dir_export = serialize_export(splines)
     print("Saved models to directory:\n{}\n".format(dir_export))
 
