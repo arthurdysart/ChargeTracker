@@ -68,15 +68,9 @@ def serialize_export(splines):
     """
     Serializes splines as PICKLE file and exports to "models" directory.
     """
-    try:
-        dir_home = os.getcwd()
-        os.chdir("models")
-        with open("models_charge_discharge.pk", "wb") as pickled_models:
-            pk.dump(tuple(splines), pickled_models)
-        dir_export = os.getcwd()
-        os.chdir(dir_home)
-    except:
-        raise OSError("Export to directory \"models\" failed.")
+    with open("models_charge_discharge.pk", "w") as pickled_models:
+        pk.dump(tuple(splines), pickled_models)
+    dir_export = pth.join(os.getcwd(), "models_charge_discharge.pk")
     return dir_export
 
 
