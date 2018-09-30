@@ -15,6 +15,7 @@ import datetime as dt
 import decouple as dc
 import kafka.producer as kk
 import numpy.random as nprnd
+import os
 import os.path as pth
 import pickle as pk
 import sys
@@ -27,8 +28,13 @@ def stdin(sys_argv):
     Imports simulation & Kafka parameters, then assigns battery parameters.
     """
     # Sets sensitive variables from ENV file
-    path_settings = pth.normpath(r"..\..\util\project_settings\.env")
-    settings = dc.Config(dc.RepositoryEnv(path_settings))
+    try:
+        path_home = os.getcwd()
+        os.chdir(r"../../util/project_settings")
+        settings = dc.Config(dc.RepositoryEnv(".env"))
+        os.chdir(path_home)
+    except:
+        raise OSError("Cannot import ENV settings. Check path for ENV.")
     # Imports terminal input for simulation & Kafka settings
     try:
         p = {}
@@ -44,12 +50,13 @@ def stdin(sys_argv):
         raise ValueError("Cannot interpret parameters. Check terminal input.")
 
     # Imports models from serialized models file
-    try:
-        models_path = pth.normpath(settings.get("PATH_MODELS"))
-        with open(models_path, "rb") as pickled_models:
-            p["models"] = pk.load(pickled_models)
-    except:
-        raise OSError("Cannot import models. Check path for models file.")
+    os.chdir(r"../../util/models_generator/models")
+    print(os.getcwd())
+    print(os.listdir("."))
+    with open("models_charge_discharge.pk", "rb") as pickled_models:
+        print("Inside file")
+        p["models"] = pk.load(pickled_models)
+    raise OSError("Cannot import models. Check path for models file.")
 
     # Generates cathode and initial capacity randomly
     p["cathode"] = nprnd.choice(["A", "B", "C", "D",])
