@@ -7,7 +7,7 @@ Template:
 python export_models.py <model_charge_relative_path> <model_discharge_relative_path>
 
 Example:
-python export_models.py "models\cobalt-oxide_charge.csv" "models\cobalt-oxide_discharge.csv"
+python export_models.py "cobalt-oxide_charge.csv" "cobalt-oxide_discharge.csv"
 """
 
 
