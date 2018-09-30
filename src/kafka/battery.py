@@ -30,7 +30,7 @@ def stdin(sys_argv):
     # Sets sensitive variables from ENV file
     try:
         path_home = os.getcwd()
-        os.chdir(r"../../util/project_settings")
+        os.chdir(r"../../util/settings")
         settings = dc.Config(dc.RepositoryEnv(".env"))
         os.chdir(path_home)
     except:
@@ -50,13 +50,12 @@ def stdin(sys_argv):
         raise ValueError("Cannot interpret parameters. Check terminal input.")
 
     # Imports models from serialized models file
-    os.chdir(r"../../util/models_generator/models")
-    print(os.getcwd())
-    print(os.listdir("."))
-    with open("models_charge_discharge.pk", "rb") as pickled_models:
-        print("Inside file")
-        p["models"] = pk.load(pickled_models)
-    raise OSError("Cannot import models. Check path for models file.")
+    try:
+        os.chdir(r"../../util/models")
+        with open("models_charge_discharge.pk", "rb") as pickled_models:
+            p["models"] = pk.load(pickled_models)
+    except:
+        raise OSError("Cannot import models. Check path for models file.")
 
     # Generates cathode and initial capacity randomly
     p["cathode"] = nprnd.choice(["A", "B", "C", "D",])
@@ -98,7 +97,7 @@ def generate_step_data(n, step, p, kafka_prod):
 
     # Generates and publishes data entries while elasped time below max time
     while elasped_time <= max_time:
-        delta_time = elasped_time / max_time
+        delta_time = elasped_time.total_seconds() / max_time.total_seconds()
         voltage = model(delta_time) * p["v_range"] + p["v_min"]
         date_time = p["initial_time"] + elasped_time
         entry = create_entry(date_time, n, step, voltage, p)

@@ -70,7 +70,7 @@ def serialize_export(splines):
     """
     try:
         with open("models_charge_discharge.pk", "wb") as pickled_models:
-            pk.dump(tuple(splines), pickled_models)
+            pk.dump(tuple(splines), pickled_models, protocol=2)
         dir_export = pth.join(os.getcwd(), "models_charge_discharge.pk")
     except:
         raise OSError("Cannot export model. Check serialization protocol.")
