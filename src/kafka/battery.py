@@ -4,10 +4,10 @@ from __future__ import print_function
 Publishes simulated battery cycling data to created kafka producer.
 
 Template:
-python battery_simulator_kafka.py <id> <cycles> <current> <low_voltage_limit> <high_voltage_limit>
+python battery.py <id> <cycles> <current> <low_voltage_limit> <high_voltage_limit>
 
 Example:
-python battery_simulator_kafka.py 1 1000 200 2.0 4.5
+python battery.py 1 1000 200 2.0 4.5
 """
 
 ## MODULE IMPORTS
