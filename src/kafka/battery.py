@@ -117,7 +117,9 @@ def generate_cycle_data(n, p, kafka_prod):
     Produces line entries for both "C" and "D" steps for given cycle.
     """
     generate_step_data(n, "C", p, kafka_prod)
+    print("Completed cycle {} C ...".format(n))
     generate_step_data(n, "D", p, kafka_prod)
+    print("Completed cycle {} D ...".format(n))
     return 2
 
 ## MAIN MODULE
