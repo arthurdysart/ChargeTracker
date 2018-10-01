@@ -35,6 +35,7 @@ def stdin(sys_argv):
         os.chdir(path_home)
     except:
         raise OSError("Cannot import ENV settings. Check path for ENV.")
+
     # Imports terminal input for simulation & Kafka settings
     try:
         p = {}
@@ -67,9 +68,11 @@ def create_entry(date_time, n, step, voltage, p):
     Creates string with format for data entry.
     Schema: <id>, <cathode>, <dt>, <cycle>, <step>, <voltage>, <current>\n
     """
-    date_time = date_time.strftime("%Y-%m-%d %H:%M:%S:%f")
+    date_time_0 = p["initial_time"].strftime("%Y-%m-%d %H:%M:%S")
+    date_time = date_time.strftime("%Y-%m-%d %H:%M:%S")
     schema = (str(p["id"]),
               p["cathode"],
+              date_time_0,
               date_time,
               str(n),
               step,
