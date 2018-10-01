@@ -16,7 +16,6 @@ import decouple as dc
 import kafka.producer as kk
 import numpy.random as nprnd
 import os
-import os.path as pth
 import pickle as pk
 import sys
 
@@ -63,21 +62,22 @@ def stdin(sys_argv):
     p["capacity"] = nprnd.choice(range(2000, 10001))
     return p
 
-def create_entry(date_time, n, step, voltage, p):
+def create_entry(date_time, n, step, voltage, voltage_prev, max_time, p):
     """
     Creates string with format for data entry.
     Schema: <id>, <cathode>, <dt>, <cycle>, <step>, <voltage>, <current>\n
     """
-    date_time_0 = p["initial_time"].strftime("%Y-%m-%d %H:%M:%S")
+    #date_time_0 = p["initial_time"].strftime("%Y-%m-%d %H:%M:%S")
     date_time = date_time.strftime("%Y-%m-%d %H:%M:%S")
     schema = (str(p["id"]),
               p["cathode"],
-              date_time_0,
-              date_time,
               str(n),
               step,
+              date_time,
               str(voltage),
-              str(p["current"]),)
+              str(p["current"]),
+              str(voltage_prev),
+              str(max_time),)
     return ", ".join(schema) + "\n"
 
 def generate_step_data(n, step, p, kafka_prod):
@@ -93,6 +93,7 @@ def generate_step_data(n, step, p, kafka_prod):
     # If not first charge cycle, Reduces maximum capacity by 96 - 100 %
     if (n, step) != (1, "C"):
         p["capacity"] *= nprnd.choice(range(96, 100)) / 100.0
+        p["voltage_prev"] = 0.0
 
     # Initializes time parameters
     max_time = abs(dt.timedelta(seconds=(p["capacity"] * 3600 / p["current"])))
@@ -103,8 +104,9 @@ def generate_step_data(n, step, p, kafka_prod):
         delta_time = elasped_time.total_seconds() / max_time.total_seconds()
         voltage = model(delta_time) * p["v_range"] + p["v_min"]
         date_time = p["initial_time"] + elasped_time
-        entry = create_entry(date_time, n, step, voltage, p)
+        entry = create_entry(date_time, n, step, voltage, p["voltage_prev"], max_time, p)
         kafka_prod.send(p["kafka_topic"], entry)
+        p["voltage_prev"] = voltage
         elasped_time += dt.timedelta(seconds=1)
     p["initial_time"] += elasped_time
 
