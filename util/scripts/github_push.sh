@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Automates github push commands
+# Automates github repository upload.
 #
 # Template:
 # bash github_push.sh <commit-message>
@@ -10,7 +10,7 @@
 # Sets Github commit message
 COMMIT_MESSAGE=$1
 
-# Deletes existing Kafka topic
+# Sends new repository to github
 git status
 git add --all .
 git commit -m "$COMMIT_MESSAGE"
