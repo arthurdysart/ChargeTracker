@@ -90,10 +90,10 @@ def generate_step_data(n, step, p, kafka_prod):
     else:
         model = p["models"][1]
 
-    # If not first charge cycle, Reduces maximum capacity by 96 - 100 %
+    # If not first charge cycle, Reduces maximum capacity by 99.0 - 99.9 %
     if (n, step) != (1, "C"):
-        p["capacity"] *= nprnd.choice(range(96, 100)) / 100.0
-        p["voltage_prev"] = 0.0
+        p["capacity"] *= nprnd.choice(range(9900, 10000)) / 10000.0
+        p["voltage_prev"] = -1 * (model(0.0) * p["v_range"] + p["v_min"])
 
     # Initializes time parameters
     max_time = abs(dt.timedelta(seconds=(p["capacity"] * 3600 / p["current"])))
