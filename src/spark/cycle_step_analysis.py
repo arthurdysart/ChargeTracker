@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 """
 Created on Mon Oct  1 11:41:14 2018
 
@@ -125,11 +126,13 @@ if __name__ == "__main__":
     sc.setLogLevel("WARN")
     ssc = StreamingContext(sc, 30)
     kafka_stream = kfk.createDirectStream(ssc, \
-                                           [p["kafka_topic"]], \
-                                           {"bootstrap.servers": p["kafka_broker"]})
+                                          [p["kafka_topic"]], \
+                                          {"bootstrap.servers": p["kafka_broker"]})
 
     # For each micro-RDD, strips whitespace and split by comma
     parsed_rdd = kafka_stream.map(lambda ln: ln.strip().split(","))
+    sample_rdd = parsed_rdd.take(5)
+    print(sample_rdd)
 
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
     summed_rdd = summarize_step_data(parsed_rdd)
