@@ -126,7 +126,7 @@ if __name__ == "__main__":
     sc.setLogLevel("WARN")
     ssc = StreamingContext(sc, 30)
     kafka_stream = kfk.createDirectStream(ssc, \
-                                           list(p["kafka_topic"]), \
+                                           [p["kafka_topic"]], \
                                            {"bootstrap.servers": p["kafka_broker"]})
 
     # For each micro-RDD, strips whitespace and split by comma
