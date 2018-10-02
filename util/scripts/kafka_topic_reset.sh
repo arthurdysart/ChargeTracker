@@ -14,10 +14,10 @@ REPLICATION=$3
 KAFKA_HOME=/usr/local/kafka/bin
 
 # Deletes existing Kafka topic
-$KAFKA_HOME/kafka-topics.sh --zookeeper localhost:2181 --delete --topic '"$KAFKA_TOPIC"'
-echo "Wait 15 minutes for deletion..."
-sleep 15m
+$KAFKA_HOME/kafka-topics.sh --zookeeper localhost:2181 --delete --topic $KAFKA_TOPIC
+echo "Wait 20 minutes for deletion of topic $KAFKA_TOPIC..."
+sleep 20m
 
 # Re-creates Kafka topic
-$KAFKA_HOME/kafka-topics.sh --zookeeper localhost:2181 --create --topic '"$KAFKA_TOPIC"' --partitions '"$PARTITION"' --replication-factor '"$REPLICATION"'
-echo "Created topic: $KAFKA_TOPIC"
+echo "Creating topic $KAFKA_TOPIC..."
+$KAFKA_HOME/kafka-topics.sh --zookeeper localhost:2181 --create --topic $KAFKA_TOPIC --partitions $PARTITIONS --replication-factor $REPLICATION
