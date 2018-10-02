@@ -1,0 +1,40 @@
+#!/bin/bash
+#
+# From local computer, updates ENV file on Control, Kafka, Spark, and Database master nodes.
+# Ensure PEM KEY is entered below.
+#
+# Template:
+# bash update_env.sh <ENV-source-path> <project-name> <Public-IP-control> <Public-IP-kafka> <Public-IP-spark> <Public-IP-database>
+# Example:
+# bash update_env.sh <ENV-source-path> overview 1X.2XX.1XX.X 5X.7X.1XX.XXX 1X.2XX.8X.XX 1X.2XX.8X.XX
+
+# Initializes ENV and PEM source paths from standard input
+echo "Updating ENV files..."
+ENV_PATH=$1
+PROJ_NAME=$2
+
+# Sets Public DNS for Control node
+CONTROL_NODE=$3
+# Sends updated ENV to Control node
+echo "Sending ENV to Control node..."
+scp -i <PEM-key-path> $ENV_PATH "ec2-user@$CONTROL_NODE:/home/ec2-user/$PROJ_NAME/util/settings"
+
+# Sets Public DNS for Kafka
+KAFKA_MASTER=$4
+# Sends updated ENV to Kafka
+echo "Sending ENV to Kafka..."
+scp -i <PEM-key-path> $ENV_PATH "ubuntu@$KAFKA_MASTER:/home/ubuntu/$PROJ_NAME/util/settings"
+
+# Sets Public DNS for Spark
+SPARK_MASTER=$5
+# Sends updated ENV to Spark
+echo "Sending ENV to Spark..."
+scp -i <PEM-key-path> "ubuntu@$SPARK_MASTER:/home/ubuntu/$PROJ_NAME/util/settings"
+
+# Sets Public DNS for database
+DATABASE_MASTER=$6
+# Sends updated ENV to database
+echo "Sending ENV to database..."
+scp -i <PEM-key-path> $ENV_PATH "ubuntu@$DATABASE_MASTER:/home/ubuntu/$PROJ_NAME/util/settings"
+
+echo "All ENV files updated!"
