@@ -3,9 +3,9 @@
 # Produces multiple battery data generators using TMUX.
 #
 # Template:
-# bash reset_topic.sh <KAFKA_TOPIC> <PARTITIONS> <REPLICATION>
+# bash kafka_topic_reset.sh <KAFKA_TOPIC> <PARTITIONS> <REPLICATION>
 # Example:
-# bash reset_topic.sh battery_data 1 3
+# bash kafka_topic_reset.sh battery_data 1 3
 
 # Sets Kafka parameters from standard input
 KAFKA_TOPIC=$1
