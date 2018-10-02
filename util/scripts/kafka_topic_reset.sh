@@ -15,8 +15,8 @@ KAFKA_HOME=/usr/local/kafka/bin
 
 # Deletes existing Kafka topic
 $KAFKA_HOME/kafka-topics.sh --zookeeper localhost:2181 --delete --topic '"$KAFKA_TOPIC"'
-echo "Wait 20 minutes for deletion..."
-sleep 20m
+echo "Wait 15 minutes for deletion..."
+sleep 15m
 
 # Re-creates Kafka topic
 $KAFKA_HOME/kafka-topics.sh --zookeeper localhost:2181 --create --topic '"$KAFKA_TOPIC"' --partitions '"$PARTITION"' --replication-factor '"$REPLICATION"'
