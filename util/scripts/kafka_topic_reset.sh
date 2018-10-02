@@ -21,3 +21,6 @@ sleep 20m
 # Re-creates Kafka topic
 echo "Creating topic $KAFKA_TOPIC..."
 $KAFKA_HOME/kafka-topics.sh --zookeeper localhost:2181 --create --topic $KAFKA_TOPIC --partitions $PARTITIONS --replication-factor $REPLICATION
+
+
+## END OF FILE

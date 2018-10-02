@@ -122,8 +122,8 @@ if __name__ == "__main__":
     p = stdin(sys.argv)
 
     # Initializes spark context SC and streaming context SCC
-    sc = SparkContext(appName=p["spark_name"]) \
-        .setLogLevel("WARN")
+    sc = SparkContext(appName=p["spark_name"])
+    sc.setLogLevel("WARN")
     ssc = StreamingContext(sc, 30)
     kafka_stream = kfk.createDirectStream(ssc, \
                                            list(p["kafka_topic"]), \
