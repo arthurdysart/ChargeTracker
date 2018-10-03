@@ -119,7 +119,6 @@ def save_to_database(input_rdd, table_name):
 if __name__ == "__main__":
     # Sets Kafka and Cassandra parameters
     p = stdin(sys.argv)
-    print("******************************  {}  **  {}  **********************************************".format(p["kafka_topic"], type(p["kafka_topic"])))
     # Initializes spark context SC and streaming context SCC
     sc = SparkContext(appName=p["spark_name"])
     sc.setLogLevel("WARN")
@@ -129,8 +128,7 @@ if __name__ == "__main__":
                                           {"bootstrap.servers": p["kafka_broker"]})
 
     # For each micro-RDD, strips whitespace and split by comma
-    parsed_rdd = kafka_stream.map(lambda ln: ln.strip().split(","))
-    print("******************************LOOK AT THIS DATA!**********************************************")
+    parsed_rdd = kafka_stream.map(lambda ln: ln[0].strip().split(","))
     parsed_rdd.pprint(10)
 
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
