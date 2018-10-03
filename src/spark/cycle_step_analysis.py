@@ -111,7 +111,6 @@ def save_to_database(input_rdd, table_name):
     For each micro-RDD, sends partition to target database.
     Requires "send_partition" function.
     """
-    print("*****************************TABLE NAME IS: {}****************************".format(table_name))
     input_rdd.foreachRDD(lambda rdd: rdd.foreachPartition(lambda entries: send_partition(entries, table_name)))
     return None
 
@@ -131,7 +130,8 @@ if __name__ == "__main__":
 
     # For each micro-RDD, strips whitespace and split by comma
     parsed_rdd = kafka_stream.map(lambda ln: ln.strip().split(","))
-    parsed_rdd.pprint(100)
+    print("******************************LOOK AT THIS DATA!**********************************************")
+    parsed_rdd.pprint(10)
 
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
     summed_rdd = summarize_step_data(parsed_rdd)
