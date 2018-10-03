@@ -76,7 +76,7 @@ def send_partition(entries):
     Required by "save_to_database" function.
     """
     # Initializes keyspace and CQL batch executor in Cassandra database
-    db_cass = cassc.Cluster(p["cassandra"]).connect(p["cassandra_key"])
+    db_cass = cassc.Cluster([p["cassandra"]]).connect(p["cassandra_key"])
     cmd_batch = cassq.BatchStatement(consistency_level=ConsistencyLevel.QUORUM)
     cmd_size = 0
 
