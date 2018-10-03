@@ -77,7 +77,7 @@ def send_partition(entries):
     """
     # Initializes keyspace and CQL batch executor in Cassandra database
     db_cass = cassc.Cluster([p["cassandra"]]).connect(p["cassandra_key"])
-    cmd_batch = cassq.BatchStatement(consistency_level=ConsistencyLevel.QUORUM)
+    cmd_batch = cassq.BatchStatement(consistency_level=cass.ConsistencyLevel.QUORUM)
     cmd_size = 0
 
     # Prepares CQL statement with appropriate values
