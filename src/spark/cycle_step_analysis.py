@@ -66,14 +66,14 @@ def summarize_step_data(parsed_rdd):
     preeval_rdd.pprint(3)
 
     # Calculates incremental energy and weighted power for each data entry
-    # SCHEMA: (key) : (<date-time: str>, <incremental energy: float>, <weighted power: float>)
-    calc_rdd = preeval_rdd.map(lambda x: (x[0], (x[1][0], x[1][1] * x[1][2] * x[1][4], x[1][1] * x[1][2] * x[1][4] / x[1][3],)))
+    # SCHEMA: (key) : (<incremental energy: float>, <weighted power: float>)
+    calc_rdd = preeval_rdd.map(lambda x: (x[0], (x[1][1] * x[1][2] * x[1][4], x[1][1] * x[1][2] * x[1][4] / x[1][3],)))
     print("CALCUALTED DATA")
     calc_rdd.pprint(3)
 
     # For each key, sums incremental energy and weighted power for each data entry
     # SCHEMA: (key) : (<total energy: float>, <average power: float>)
-    summed_rdd = calc_rdd.reduceByKey(lambda i, j: (i[1] + j[1], i[2] + j[2]))
+    summed_rdd = calc_rdd.reduceByKey(lambda i, j: (i[0] + j[0], i[1] + j[1]))
     print("SUMMED DATA")
     summed_rdd.pprint(3)
 
