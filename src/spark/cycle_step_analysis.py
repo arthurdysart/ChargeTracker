@@ -70,7 +70,7 @@ def summarize_step_data(parsed_rdd):
 
     return summed_rdd
 
-def send_partition(entries, table_name=""):
+def send_partition(entries, table_name):
     """
     Collects rdd entries and sends as batch of CQL commands.
     Required by "save_to_database" function.
@@ -111,7 +111,7 @@ def save_to_database(input_rdd, table_name):
     For each micro-RDD, sends partition to target database.
     Requires "send_partition" function.
     """
-    input_rdd.foreachRDD(lambda rdd: rdd.foreachPartition(send_partition(entries, table_name=table_name)))
+    input_rdd.foreachRDD(lambda rdd: rdd.foreachPartition(lambda entries: send_partition(entries, table_name)))
     return None
 
 
