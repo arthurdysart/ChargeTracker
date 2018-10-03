@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
     summed_rdd = summarize_step_data(parsed_rdd)
-    summed_rdd.persist()
+    #summed_rdd.persist()
 
     # Transforms overall values to CQL format for storage in Cassandra database
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <total energy>)
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     save_to_database(power_rdd, "power")
 
     # Unpersists overall values RDD
-    summed_rdd.unpersist()
+    #summed_rdd.unpersist()
 
     # Starts and stops spark streaming context
     ssc.start()
