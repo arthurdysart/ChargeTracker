@@ -3,9 +3,9 @@
 # Automates github repository download.
 #
 # Template:
-# bash github_pull.sh
+# bash pull.sh
 # Example:
-# bash github_pull.sh
+# bash pull.sh
 
 # Pulls most recent repository version from github
 git status

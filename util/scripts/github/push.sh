@@ -3,9 +3,9 @@
 # Automates github repository upload.
 #
 # Template:
-# bash github_push.sh <commit-message>
+# bash push.sh <commit-message>
 # Example:
-# bash github_push.sh <commit-message>
+# bash push.sh <commit-message>
 
 # Sets Github commit message
 COMMIT_MESSAGE=$1
