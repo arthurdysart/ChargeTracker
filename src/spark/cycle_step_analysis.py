@@ -123,12 +123,10 @@ if __name__ == "__main__":
     sc = SparkContext(appName=p["spark_name"])
     sc.setLogLevel("WARN")
     ssc = StreamingContext(sc, 30)
-    kafka_stream = kfk.createDirectStream(ssc, \
-                                          p["kafka_topic"], \
-                                          {"bootstrap.servers": p["kafka_broker"]})
+    kafka_stream = kfk.createDirectStream(ssc, p["kafka_topic"], {"bootstrap.servers": p["kafka_broker"]})
 
     # For each micro-RDD, strips whitespace and split by comma
-    parsed_rdd = kafka_stream.map(lambda ln: ln[0].strip().split(","))
+    parsed_rdd = kafka_stream.map(lambda ln: ln[1].strip().split(","))
     parsed_rdd.pprint(10)
 
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
