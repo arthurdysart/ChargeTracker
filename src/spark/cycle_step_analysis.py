@@ -53,7 +53,7 @@ def summarize_step_data(parsed_rdd):
     # Transforms parsed entries into key-value pair
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>) : (<date-time: str>, <voltage: float>, <current: float>, <prev_voltage: float>, <step_time: float>)
     # HOW TO IDENTIFY AS PAIR RDD?
-    paired_rdd = parsed_rdd.map(lambda x: ((x[0], x[1], int(x[2]), x[3],), (x[4], float(x[5]), float(x[6]), float(x[7]), float(x[8]),)))
+    paired_rdd = parsed_rdd.map(lambda x: ((int(x[0]), str(x[1]), int(x[2]), str(x[3]),), (str(x[4]), float(x[5]), float(x[6]), float(x[7]), str(x[8]),)))
   
     # Aggregates voltages prior to calculation of energy and power
     # SCHEMA: (key) : (<date-time:str>, <voltage sum: float>, <current: float>, <step_time: float>, <delta_time: float>)
