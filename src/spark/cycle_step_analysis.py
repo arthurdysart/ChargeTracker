@@ -81,11 +81,11 @@ def send_partition(entries, table_name):
     cmd_size = 0
 
     # Prepares CQL statement with appropriate values
-    if table_name.lower() is "energy":
+    if "energy" in table_name.lower():
         cql_schema = "INSERT INTO energy (id, cathode, cycle, step, energy) VALUES (?, ?, ?, ?, ?)"
-    elif table_name.lower() is "power":
+    elif "power" in table_name.lower():
         cql_schema = "INSERT INTO power (id, cathode, cycle, step, power) VALUES (?, ?, ?, ?, ?)"
-    elif table_name.lower() is "capacity":
+    elif "capacity" in table_name.lower():
         cql_schema = "INSERT INTO capacity (id, cathode, cycle, step, capacity) VALUES (?, ?, ?, ?, ?)"
     else:
         raise SyntaxError("Cannot find specified table. Check name and run again.")
