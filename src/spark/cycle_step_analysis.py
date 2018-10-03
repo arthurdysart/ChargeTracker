@@ -55,7 +55,7 @@ def summarize_step_data(parsed_rdd):
     # Transforms parsed entries into key-value pair
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>) : (<date-time: str>, <voltage: float>, <current: float>, <prev_voltage: float>, <step_time: float>)
     # HOW TO IDENTIFY AS PAIR RDD?
-    paired_rdd = parsed_rdd.map(lambda x: ((int(x[0]), str(x[1]), int(x[2]), str(x[3]),), (str(x[4]), float(x[5]), float(x[6]), float(x[7]), str(x[8]),)))
+    paired_rdd = parsed_rdd.map(lambda x: ((int(x[0]), str(x[1]), int(x[2]), str(x[3]),), (str(x[4]), float(x[5]), float(x[6]), float(x[7]), float(x[8]),)))
     print("PAIRED DATA")
     paired_rdd.pprint(3)
 
@@ -67,7 +67,7 @@ def summarize_step_data(parsed_rdd):
 
     # Calculates incremental energy and weighted power for each data entry
     # SCHEMA: (key) : (<date-time: str>, <incremental energy: float>, <weighted power: float>)
-    calc_rdd = preeval_rdd.map(lambda x: tuple(x[0], tuple(x[1][1] * x[1][2] * x[1][4], x[1][1] * x[1][3] * x[1][5] / x[1][4],)))
+    calc_rdd = preeval_rdd.map(lambda x: tuple(x[0], tuple(x[1][0], x[1][1] * x[1][2] * x[1][4], x[1][1] * x[1][2] * x[1][4] / x[1][3],)))
     print("CALCUALTED DATA")
     calc_rdd.pprint(3)
 
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     kafka_stream = kfk.createDirectStream(ssc, p["kafka_topic"], {"bootstrap.servers": p["kafka_broker"]})
 
     # For each micro-RDD, strips whitespace and split by comma
-    parsed_rdd = kafka_stream.map(lambda ln: ln[1].strip().split(","))
+    parsed_rdd = kafka_stream.map(lambda ln: tuple(x.strip() for x in ln[1].strip().split(",")))
 
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
     summed_rdd = summarize_step_data(parsed_rdd)
