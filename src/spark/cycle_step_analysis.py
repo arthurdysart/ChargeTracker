@@ -37,10 +37,10 @@ def stdin(sys_argv):
     try:
         p = {}
         p["spark_name"]= settings.get("SPARK_NAME")
-        p["cassandra"] = settings.get("CASSANDRA_MASTER")
+        p["cassandra"] = settings.get("CASSANDRA_MASTER", cast=dc.Csv())
         p["cassandra_key"] = settings.get("CASSANDRA_KEYSPACE")
         p["kafka_broker"] = settings.get("KAFKA_BROKER")
-        p["kafka_topic"] = settings.get("KAFKA_TOPIC")
+        p["kafka_topic"] = settings.get("KAFKA_TOPIC", cast=dc.Csv())
     except:
         raise ValueError("Cannot interpret external settings. Check ENV file.")
 
@@ -76,7 +76,7 @@ def send_partition(entries, table_name):
     Required by "save_to_database" function.
     """
     # Initializes keyspace and CQL batch executor in Cassandra database
-    db_cass = cassc.Cluster([p["cassandra"]]).connect(p["cassandra_key"])
+    db_cass = cassc.Cluster(p["cassandra"]).connect(p["cassandra_key"])
     cmd_batch = cassq.BatchStatement(consistency_level=cass.ConsistencyLevel.QUORUM)
     cmd_size = 0
 
@@ -119,13 +119,13 @@ def save_to_database(input_rdd, table_name):
 if __name__ == "__main__":
     # Sets Kafka and Cassandra parameters
     p = stdin(sys.argv)
-
+    print("******************************  {}  **  {}  **********************************************".format(p["kafka_topic"], type(p["kafka_topic"])))
     # Initializes spark context SC and streaming context SCC
     sc = SparkContext(appName=p["spark_name"])
     sc.setLogLevel("WARN")
     ssc = StreamingContext(sc, 30)
     kafka_stream = kfk.createDirectStream(ssc, \
-                                          [p["kafka_topic"]], \
+                                          p["kafka_topic"], \
                                           {"bootstrap.servers": p["kafka_broker"]})
 
     # For each micro-RDD, strips whitespace and split by comma
