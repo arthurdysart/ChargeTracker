@@ -73,7 +73,7 @@ def summarize_step_data(parsed_rdd):
 
     # For each key, sums incremental energy and weighted power for each data entry
     # SCHEMA: (key) : (<total energy: float>, <average power: float>)
-    summed_rdd = calc_rdd.reduceByKey(lambda i, j: tuple(i[1] + j[1], i[2] + j[2]))
+    summed_rdd = calc_rdd.reduceByKey(lambda i, j: (i[1] + j[1], i[2] + j[2]))
     print("SUMMED DATA")
     summed_rdd.pprint(3)
 
