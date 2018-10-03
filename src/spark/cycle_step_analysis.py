@@ -70,7 +70,7 @@ def summarize_step_data(parsed_rdd):
 
     return summed_rdd
 
-def send_partition(entries, table_name):
+def send_partition(entries):
     """
     Collects rdd entries and sends as batch of CQL commands.
     Required by "save_to_database" function.
