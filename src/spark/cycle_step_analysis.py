@@ -111,6 +111,7 @@ def save_to_database(input_rdd, table_name):
     For each micro-RDD, sends partition to target database.
     Requires "send_partition" function.
     """
+    print("*****************************TABLE NAME IS: {}****************************".format(table_name))
     input_rdd.foreachRDD(lambda rdd: rdd.foreachPartition(lambda entries: send_partition(entries, table_name)))
     return None
 
