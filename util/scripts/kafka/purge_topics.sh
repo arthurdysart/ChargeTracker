@@ -3,7 +3,7 @@
 # Deletes all topics from Kafka.
 #
 # Example:
-# bash kafka_purge_topics.sh
+# bash purge_topics.sh
 
 # Gets all current topics in Kafka
 KAFKA_HOME=/usr/local/kafka/bin
