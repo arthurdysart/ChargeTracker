@@ -138,7 +138,7 @@ if __name__ == "__main__":
     kafka_stream = kfk.createDirectStream(ssc, p["kafka_topic"], {"bootstrap.servers": p["kafka_broker"]})
 
     # For each micro-RDD, strips whitespace and split by comma
-    parsed_rdd = kafka_stream.map(lambda ln: (x.strip() for x in ln[1].strip().split(",")))
+    parsed_rdd = kafka_stream.map(lambda ln: tuple(x for x in ln[1].strip().split(",")))
     parsed_rdd.cache()
     parsed_rdd.pprint(5)
     
