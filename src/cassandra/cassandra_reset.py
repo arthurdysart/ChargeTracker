@@ -55,18 +55,20 @@ def setup_connection(p):
     cmd_batch = cassq.BatchStatement(consistency_level=cass.ConsistencyLevel.QUORUM)
     return db_cass, cmd_batch
 
-def reset_table(table_name):
+def reset_table(table_name, db_cass):
     """
     """
     # Creates CQL command for dropping existing table
     cql_drop = """ DROP TABLE IF EXISTS {}; """.format(table_name)
+    db_cass.execute(cql_drop)
 
     # Creates CQL command for creating table
     cql_create = """ CREATE TABLE IF NOT EXISTS {}(id int, cathode text,
     cycle int, step text, {} float, PRIMARY KEY(id, cathode, cycle, step))
     WITH CLUSTERING ORDER BY (cathode DESC, cycle DESC); """ \
     .format(table_name, table_name)
-    return cql_drop, cql_create
+    db_cass.execute(cql_create)
+    return 1
 
 
 ## MAIN MODULE
@@ -78,16 +80,8 @@ if __name__ == "__main__":
     db_cass, cql_batch = setup_connection(p)
 
     # Creates all CQL commands for table reset
-    cql_commands = [reset_table(name) for name in table_names]
-
-    # Adds all CQL commands to CQL statement batch
-    for pair in cql_commands:
-        for cmd in pair:
-            cql_batch.add(cmd)
-
-    # Executes CQL statement batch on Cassandra database
-    db_cass.execute(cql_batch)
-    print("Reset all specified tables.")
+    count = sum(reset_table(name, db_cass, cql_batch) for name in table_names)
+    print("Reset {} tables.".format(count))
 
     
 ## END OF FILE
