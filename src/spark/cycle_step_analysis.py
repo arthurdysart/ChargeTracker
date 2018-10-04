@@ -36,10 +36,10 @@ def stdin(sys_argv):
     try:
         p = {}
         p["spark_name"]= settings.get("SPARK_NAME")
-        p["cassandra"] = settings.get("CASSANDRA_MASTER")
+        p["cassandra"] = settings.get("CASSANDRA_MASTER", cast=dc.Csv())
         p["cassandra_key"] = settings.get("CASSANDRA_KEYSPACE")
         p["kafka_broker"] = settings.get("KAFKA_BROKER")
-        p["kafka_topic"] = settings.get("KAFKA_TOPIC")
+        p["kafka_topic"] = settings.get("KAFKA_TOPIC", cast=dc.Csv())
     except:
         raise ValueError("Cannot interpret external settings. Check ENV file.")
 
@@ -87,41 +87,42 @@ def save_to_database(input_rdd, table_name):
     input_rdd.foreachRDD(lambda rdd: rdd.foreachPartition(send_partition))
     #input_rdd.foreachRDD(lambda entries: send_partition(entries, table_name))
 
+
     def send_partition(entries):
-        """
-        Collects rdd entries and sends as batch of CQL commands.
-        Required by "save_to_database" function.
-        """
-        # Initializes keyspace and CQL batch executor in Cassandra database
-        db_cass = cassc.Cluster([p["cassandra"]]).connect(p["cassandra_key"])
-        cmd_batch = cassq.BatchStatement(consistency_level=cass.ConsistencyLevel.QUORUM)
-        cmd_size = 0
-    
-        # Prepares CQL statement with appropriate values
-        if "energy" in table_name.lower():
-            cql_schema = "INSERT INTO energy (id, cathode, cycle, step, energy) VALUES (?, ?, ?, ?, ?)"
-        elif "power" in table_name.lower():
-            cql_schema = "INSERT INTO power (id, cathode, cycle, step, power) VALUES (?, ?, ?, ?, ?)"
-        elif "capacity" in table_name.lower():
-            cql_schema = "INSERT INTO capacity (id, cathode, cycle, step, capacity) VALUES (?, ?, ?, ?, ?)"
-        else:
-            raise SyntaxError("Cannot find specified table. Check name and run again.")
-        cql_statement = db_cass.prepare(cql_schema)
+            """
+            Collects rdd entries and sends as batch of CQL commands.
+            Required by "save_to_database" function.
+
+            # Initializes keyspace and CQL batch executor in Cassandra database
+            db_cass = cassc.Cluster(p["cassandra"]).connect(p["cassandra_key"])
+            cmd_batch = cassq.BatchStatement(consistency_level=cass.ConsistencyLevel.QUORUM)
+            cmd_size = 0
         
-        # Iterates over all entries in rdd partition
-        for entry in entries:
-            cmd_batch.add(cql_statement, entry)
-            cmd_size += 1
-            # Executes collected CQL commands on Cassandra keyspace, and re-initializes collection
-            if cmd_size % 500 == 0:
-                db_cass.execute(cmd_batch)
-                cmd_batch = cassq.BatchStatement(consistency_level=cass.ConsistencyLevel.QUORUM)
-    
-        # Executes final set of batches and closes Cassandra session
-        db_cass.execute(cmd_batch)
-        db_cass.shutdown()
-    
-        return None
+            # Prepares CQL statement with appropriate values
+            if "energy" in table_name.lower():
+                cql_schema = "INSERT INTO energy (id, cathode, cycle, step, energy) VALUES (?, ?, ?, ?, ?)"
+            elif "power" in table_name.lower():
+                cql_schema = "INSERT INTO power (id, cathode, cycle, step, power) VALUES (?, ?, ?, ?, ?)"
+            elif "capacity" in table_name.lower():
+                cql_schema = "INSERT INTO capacity (id, cathode, cycle, step, capacity) VALUES (?, ?, ?, ?, ?)"
+            else:
+                raise SyntaxError("Cannot find specified table. Check name and run again.")
+            cql_statement = db_cass.prepare(cql_schema)
+            
+            # Iterates over all entries in rdd partition
+            for entry in entries:
+                cmd_batch.add(cql_statement, entry)
+                cmd_size += 1
+                # Executes collected CQL commands on Cassandra keyspace, and re-initializes collection
+                if cmd_size % 500 == 0:
+                    db_cass.execute(cmd_batch)
+                    cmd_batch = cassq.BatchStatement(consistency_level=cass.ConsistencyLevel.QUORUM)
+        
+            # Executes final set of batches and closes Cassandra session
+            db_cass.execute(cmd_batch)
+            db_cass.shutdown()
+            """
+            return None
 
     return None
 
@@ -134,7 +135,7 @@ if __name__ == "__main__":
     sc = SparkContext(appName=p["spark_name"])
     sc.setLogLevel("WARN")
     ssc = StreamingContext(sc, 30)
-    kafka_stream = kfk.createDirectStream(ssc, [p["kafka_topic"]], {"bootstrap.servers": p["kafka_broker"]})
+    kafka_stream = kfk.createDirectStream(ssc, p["kafka_topic"], {"bootstrap.servers": p["kafka_broker"]})
 
     # For each micro-RDD, strips whitespace and split by comma
     parsed_rdd = kafka_stream.map(lambda ln: (x.strip() for x in ln[1].strip().split(",")))
