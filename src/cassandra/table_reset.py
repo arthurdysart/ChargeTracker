@@ -59,6 +59,8 @@ def reset_table(table_name, db_cass, cql_batch):
     """
     Creates and executes CQL commands to drop and re-create Cassandra tables.
     """
+    print("Respawning table {} ...".format(table_name))
+
     # Creates CQL command for dropping existing table
     cql_drop = """ DROP TABLE IF EXISTS {}; """.format(table_name)
     db_cass.execute(cql_drop)
@@ -85,7 +87,7 @@ if __name__ == "__main__":
     count = sum(reset_table(name, db_cass, cql_batch) for name in table_names)
     db_cass.shutdown()
 
-    print("Reset {} tables: {}".format(count, table_names))
+    print("Reset {} tables: {}".format(count, ", ".join(table_names)))
 
 
 ## END OF FILE

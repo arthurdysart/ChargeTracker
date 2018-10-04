@@ -91,6 +91,7 @@ def summarize_step_data(parsed_rdd):
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>) : (<date-time: str>, <voltage: float>, <current: float>, <prev_voltage: float>, <step_time: float>)
     # HOW TO IDENTIFY AS PAIR RDD?
     paired_rdd = parsed_rdd.map(lambda x: ((int(x[0]), str(x[1]), int(x[2]), str(x[3]),), (str(x[4]), float(x[5]), float(x[6]), float(x[7]), float(x[8]),)))
+    paired_rdd.pprint(3)
 
     # Calculates instantaneous capacity, energy, and power for each entry
     # SCHEMA: (key) : (<capacity: float>, <energy: float>, <power: float>, <counts: int>)
@@ -99,6 +100,7 @@ def summarize_step_data(parsed_rdd):
                                          x[1][2] * (x[1][1] + x[1][3]) * DELTA_TIME / (2 * ENERGY_CONVERSION),
                                          x[1][2] * x[1][1] / POWER_CONVERSION,
                                          1))
+    inst_rdd.pprint(3)
 
     # Calculates total capacity and energy, and power sum for each key
     # SCHEMA: (key) : (<total capacity: float>, <total energy: float>, <power sum: float>, <count sum: float>)
@@ -106,6 +108,7 @@ def summarize_step_data(parsed_rdd):
                                                    i[1] + j[1],
                                                    i[2] + j[2],
                                                    i[3] + j[3]))
+    total_rdd.pprint(3)
 
     # Calculates total capacity and energy, and power sum for each key
     # SCHEMA: (key) : (<total energy: float>, <average power: float>)
@@ -113,6 +116,7 @@ def summarize_step_data(parsed_rdd):
                                          x[1][0],
                                          x[1][1],
                                          x[1][2] / x[1][3]))
+    final_rdd.pprint(3)
 
     return final_rdd
 
