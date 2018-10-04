@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 """
 Created on Mon Oct  1 11:41:14 2018
 
