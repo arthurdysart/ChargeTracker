@@ -81,8 +81,9 @@ if __name__ == "__main__":
     cql_commands = [reset_table(name) for name in table_names]
 
     # Adds all CQL commands to CQL statement batch
-    for cmd in cql_commands:
-        cql_batch.add(cmd)
+    for pair in cql_commands:
+        for cmd in pair:
+            cql_batch.add(cmd)
 
     # Executes CQL statement batch on Cassandra database
     db_cass.execute(cql_batch)
