@@ -82,6 +82,8 @@ if __name__ == "__main__":
 
     # Creates all CQL commands for table reset
     count = sum(reset_table(name, db_cass, cql_batch) for name in table_names)
+    db_cass.shutdown()
+    
     print("Reset {} tables.".format(count))
 
     
