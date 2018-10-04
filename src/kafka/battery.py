@@ -103,6 +103,7 @@ def generate_step_data(n, step, p, kafka_prod):
     while elasped_time <= max_time:
         delta_time = elasped_time.total_seconds() / max_time.total_seconds()
         voltage = model(delta_time) * p["v_range"] + p["v_min"]
+        print(type(voltage))
         date_time = p["initial_time"] + elasped_time
         entry = create_entry(date_time, n, step, voltage, p["voltage_prev"], max_time.total_seconds(), p)
         kafka_prod.send(p["kafka_topic"], entry)
