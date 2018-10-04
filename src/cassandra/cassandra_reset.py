@@ -69,6 +69,7 @@ def reset_table(table_name, db_cass, cql_batch):
     WITH CLUSTERING ORDER BY (cathode DESC, cycle DESC); """ \
     .format(table_name, table_name)
     db_cass.execute(cql_create)
+
     return 1
 
 
@@ -83,8 +84,8 @@ if __name__ == "__main__":
     # Creates all CQL commands for table reset
     count = sum(reset_table(name, db_cass, cql_batch) for name in table_names)
     db_cass.shutdown()
-    
-    print("Reset {} tables.".format(count))
 
-    
+    print("Reset {} tables: {}".format(count, table_names))
+
+
 ## END OF FILE
