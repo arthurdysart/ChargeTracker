@@ -3,15 +3,10 @@ from __future__ import print_function
 """
 Transforms RDDs from Kafka direct stream (DStream) into capacity, energy, and
 power values for given CQL command batch size. Data is reduced by aggregate or
-primary key: <(0) battery-id, (1) cathode, (2) cycle, (3) step>.
+primary key: <(0) battery-id, (1) cathode, (2) cycle, (3) step>. Separate
+database tables are created for capacity, energy, and power.
 
-Existing sample data "battery_stdout.txt" generated from Kafka connect using the following command: python battery.py 1 10 1200 2.0 4.5
-
-Template:
-python cassandra_reset.py <table-name-1> <table-name-2> ... <table-name-N>
-
-Example:
-python cassandra_reset.py "energy" "power"
+To use, call from script "spark_submit.sh".
 """
 
 ## REQUIRED MODULES
@@ -54,29 +49,6 @@ def stdin(sys_argv):
 
     return p
 
-def summarize_step_data_old(parsed_rdd):
-    """
-    For each battery, cycle, and step (KEYS), calculates total energy and average power.
-    """
-    # Transforms parsed entries into key-value pair
-    # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>) : (<date-time: str>, <voltage: float>, <current: float>, <prev_voltage: float>, <step_time: float>)
-    # HOW TO IDENTIFY AS PAIR RDD?
-    paired_rdd = parsed_rdd.map(lambda x: ((int(x[0]), str(x[1]), int(x[2]), str(x[3]),), (str(x[4]), float(x[5]), float(x[6]), float(x[7]), float(x[8]),)))
-
-    # Aggregates voltages prior to calculation of energy and power
-    # SCHEMA: (key) : (<date-time:str>, <voltage sum: float>, <current: float>, <step_time: float>, <delta_time: float>)
-    preeval_rdd = paired_rdd.map(lambda x: (x[0], (x[1][0], x[1][1] + x[1][3], x[1][2], x[1][4], 1.0,)))
-
-    # Calculates incremental energy and weighted power for each data entry
-    # SCHEMA: (key) : (<incremental energy: float>, <weighted power: float>)
-    calc_rdd = preeval_rdd.map(lambda x: (x[0], (x[1][1] * x[1][2] * x[1][4], x[1][1] * x[1][2] * x[1][4] / x[1][3],)))
-
-    # For each key, sums incremental energy and weighted power for each data entry
-    # SCHEMA: (key) : (<total energy: float>, <average power: float>)
-    summed_rdd = calc_rdd.reduceByKey(lambda i, j: (i[0] + j[0], i[1] + j[1]))
-
-    return summed_rdd
-
 def summarize_step_data(parsed_rdd):
     """
     For each battery, cycle, and step (KEYS), calculates total energy and average power.
@@ -86,12 +58,11 @@ def summarize_step_data(parsed_rdd):
     CAPACITY_CONVERSION = 3.6E6
     ENERGY_CONVERSION = 3.6E6
     POWER_CONVERSION = 1.0E3
-    
+
     # Transforms parsed entries into key-value pair
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>) : (<date-time: str>, <voltage: float>, <current: float>, <prev_voltage: float>, <step_time: float>)
     # HOW TO IDENTIFY AS PAIR RDD?
     paired_rdd = parsed_rdd.map(lambda x: ((int(x[0]), str(x[1]), int(x[2]), str(x[3]),), (str(x[4]), float(x[5]), float(x[6]), float(x[7]), float(x[8]),)))
-    paired_rdd.pprint(3)
 
     # Calculates instantaneous capacity, energy, and power for each entry
     # SCHEMA: (key) : (<capacity: float>, <energy: float>, <power: float>, <counts: int>)
@@ -100,7 +71,6 @@ def summarize_step_data(parsed_rdd):
                                          x[1][2] * (x[1][1] + x[1][3]) * DELTA_TIME / (2 * ENERGY_CONVERSION),
                                          x[1][2] * x[1][1] / POWER_CONVERSION,
                                          1)))
-    inst_rdd.pprint(3)
 
     # Calculates total capacity and energy, and power sum for each key
     # SCHEMA: (key) : (<total capacity: float>, <total energy: float>, <power sum: float>, <count sum: float>)
@@ -108,7 +78,6 @@ def summarize_step_data(parsed_rdd):
                                                    i[1] + j[1],
                                                    i[2] + j[2],
                                                    i[3] + j[3]))
-    total_rdd.pprint(3)
 
     # Calculates total capacity and energy, and power sum for each key
     # SCHEMA: (key) : (<total energy: float>, <average power: float>)
@@ -116,7 +85,6 @@ def summarize_step_data(parsed_rdd):
                                            x[1][0],
                                            x[1][1],
                                            x[1][2] / x[1][3]))
-    summary_rdd.pprint(3)
 
     return summary_rdd
 
@@ -187,28 +155,21 @@ if __name__ == "__main__":
 
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
     summary_rdd = summarize_step_data(parsed_rdd)
-    summary_rdd.pprint(3)
 
     # Transforms overall values to CQL format for storage in Cassandra database
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <total energy>)
     energy_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[1]))
-    energy_rdd.pprint(3)
     save_to_database(energy_rdd, "capacity")
 
     # Transforms overall values to CQL format for storage in Cassandra database
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <total energy>)
     energy_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[2]))
-    energy_rdd.pprint(3)
     save_to_database(energy_rdd, "energy")
 
     # Transforms overall values to CQL format for storage in Cassandra database
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <average power>)
     power_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[3]))
-    power_rdd.pprint(3)
     save_to_database(power_rdd, "power")
-
-    # Unpersists overall values RDD
-    #summed_rdd.unpersist()
 
     # Starts and stops spark streaming context
     ssc.start()
