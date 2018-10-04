@@ -191,13 +191,20 @@ if __name__ == "__main__":
 
     # Transforms overall values to CQL format for storage in Cassandra database
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <total energy>)
-    energy_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[1][0]))
+    energy_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[1]))
+    energy_rdd.pprint(3)
+    save_to_database(energy_rdd, "capacity")
+
+    # Transforms overall values to CQL format for storage in Cassandra database
+    # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <total energy>)
+    energy_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[2]))
     energy_rdd.pprint(3)
     save_to_database(energy_rdd, "energy")
 
     # Transforms overall values to CQL format for storage in Cassandra database
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <average power>)
-    power_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[1][1]))
+    power_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[3]))
+    power_rdd.pprint(3)
     save_to_database(power_rdd, "power")
 
     # Unpersists overall values RDD
