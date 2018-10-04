@@ -6,10 +6,10 @@ Calculates capacity, energy, and power values for sample battery data.
 Existing sample data "battery_stdout.txt" generated from Kafka connect using the following command: python battery.py 1 10 1200 2.0 4.5
 
 Template:
-python cassandra_reset.py <table-name-1> <table-name-2> ... <table-name-N>
+python table_reset.py <table-name-1> <table-name-2> ... <table-name-N>
 
 Example:
-python cassandra_reset.py "energy" "power"
+python table_reset.py "energy" "power"
 """
 
 
