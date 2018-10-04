@@ -57,6 +57,7 @@ def setup_connection(p):
 
 def reset_table(table_name, db_cass, cql_batch):
     """
+    Creates and executes CQL commands to drop and re-create Cassandra tables.
     """
     # Creates CQL command for dropping existing table
     cql_drop = """ DROP TABLE IF EXISTS {}; """.format(table_name)
