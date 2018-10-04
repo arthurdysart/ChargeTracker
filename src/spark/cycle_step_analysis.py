@@ -101,7 +101,8 @@ def send_partition(entries, table_name):
         # Executes collected CQL commands on Cassandra keyspace, and re-initializes collection
         if cmd_size % 500 == 0:
             db_cass.execute(cmd_batch)
-            cmd_batch = cassq.BatchStatement(consistency_level=cass.ConsistencyLevel.QUORUM)
+            cmd_batch = cassq.BatchStatement(consistency_level= \
+                                             cass.ConsistencyLevel.QUORUM)
 
     # Executes final set of batches and closes Cassandra session
     db_cass.execute(cmd_batch)
@@ -114,11 +115,9 @@ def save_to_database(input_rdd, table_name):
     For each micro-RDD, sends partition to target database.
     Requires "send_partition" function.
     """
-
     input_rdd.foreachRDD(lambda rdd: \
         rdd.foreachPartition(lambda entries: \
             send_partition(entries, table_name)))
-
     return None
 
 
@@ -130,10 +129,13 @@ if __name__ == "__main__":
     sc = SparkContext(appName=p["spark_name"])
     sc.setLogLevel("WARN")
     ssc = StreamingContext(sc, 30)
-    kafka_stream = kfk.createDirectStream(ssc, p["kafka_topic"], {"bootstrap.servers": p["kafka_broker"]})
+    kafka_stream = kfk.createDirectStream(ssc, \
+                                          p["kafka_topic"], \
+                                          {"bootstrap.servers": \
+                                              p["kafka_broker"]})
 
     # For each micro-RDD, strips whitespace and split by comma
-    parsed_rdd = kafka_stream.map(lambda ln: tuple(x for x in ln[1].strip().split(",")))
+    parsed_rdd = kafka_stream.map(lambda ln: tuple(x.strip() for x in ln[1].strip().split(",")))
 
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
     summed_rdd = summarize_step_data(parsed_rdd)
