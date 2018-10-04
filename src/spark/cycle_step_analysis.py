@@ -96,10 +96,10 @@ def summarize_step_data(parsed_rdd):
     # Calculates instantaneous capacity, energy, and power for each entry
     # SCHEMA: (key) : (<capacity: float>, <energy: float>, <power: float>, <counts: int>)
     inst_rdd = paired_rdd.map(lambda x: (x[0],
-                                         x[1][2] * DELTA_TIME / CAPACITY_CONVERSION,
+                                         (x[1][2] * DELTA_TIME / CAPACITY_CONVERSION,
                                          x[1][2] * (x[1][1] + x[1][3]) * DELTA_TIME / (2 * ENERGY_CONVERSION),
                                          x[1][2] * x[1][1] / POWER_CONVERSION,
-                                         1))
+                                         1)))
     inst_rdd.pprint(3)
 
     # Calculates total capacity and energy, and power sum for each key
