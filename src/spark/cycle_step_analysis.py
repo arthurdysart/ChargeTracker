@@ -53,18 +53,22 @@ def summarize_step_data(parsed_rdd):
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>) : (<date-time: str>, <voltage: float>, <current: float>, <prev_voltage: float>, <step_time: float>)
     # HOW TO IDENTIFY AS PAIR RDD?
     paired_rdd = parsed_rdd.map(lambda x: ((int(x[0]), str(x[1]), int(x[2]), str(x[3]),), (str(x[4]), float(x[5]), float(x[6]), float(x[7]), float(x[8]),)))
+    paired_rdd.pprint(5)
 
     # Aggregates voltages prior to calculation of energy and power
     # SCHEMA: (key) : (<date-time:str>, <voltage sum: float>, <current: float>, <step_time: float>, <delta_time: float>)
     preeval_rdd = paired_rdd.map(lambda x: (x[0], (x[1][0], x[1][1] + x[1][3], x[1][2], x[1][4], 1.0,)))
+    preeval_rdd.pprint(5)
 
     # Calculates incremental energy and weighted power for each data entry
     # SCHEMA: (key) : (<incremental energy: float>, <weighted power: float>)
     calc_rdd = preeval_rdd.map(lambda x: (x[0], (x[1][1] * x[1][2] * x[1][4], x[1][1] * x[1][2] * x[1][4] / x[1][3],)))
+    calc_rdd.pprint(5)
 
     # For each key, sums incremental energy and weighted power for each data entry
     # SCHEMA: (key) : (<total energy: float>, <average power: float>)
     summed_rdd = calc_rdd.reduceByKey(lambda i, j: (i[0] + j[0], i[1] + j[1]))
+    summed_rdd.pprint(5)
 
     return summed_rdd
 
@@ -109,6 +113,13 @@ def save_to_database(input_rdd, table_name):
     For each micro-RDD, sends partition to target database.
     Requires "send_partition" function.
     """
+    # ConnectionPool is a static, lazily initialized pool of connections
+    connection = ConnectionPool.getConnection()
+    for record in input_rdd:
+        connection.send(record)
+    # return to the pool for future reuse
+    ConnectionPool.returnConnection(connection)
+
     input_rdd.foreachRDD(lambda rdd: rdd.foreachPartition(lambda entries: send_partition(entries, table_name)))
     #input_rdd.foreachRDD(lambda entries: send_partition(entries, table_name))
     return None
