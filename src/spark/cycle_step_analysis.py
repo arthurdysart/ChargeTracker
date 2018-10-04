@@ -36,10 +36,10 @@ def stdin(sys_argv):
     try:
         p = {}
         p["spark_name"]= settings.get("SPARK_NAME")
-        p["cassandra"] = settings.get("CASSANDRA_MASTER", cast=dc.Csv())
+        p["cassandra"] = settings.get("CASSANDRA_MASTER")
         p["cassandra_key"] = settings.get("CASSANDRA_KEYSPACE")
         p["kafka_broker"] = settings.get("KAFKA_BROKER")
-        p["kafka_topic"] = settings.get("KAFKA_TOPIC", cast=dc.Csv())
+        p["kafka_topic"] = settings.get("KAFKA_TOPIC")
     except:
         raise ValueError("Cannot interpret external settings. Check ENV file.")
 
@@ -87,13 +87,13 @@ def save_to_database(input_rdd, table_name):
     input_rdd.foreachRDD(lambda rdd: rdd.foreachPartition(send_partition))
     #input_rdd.foreachRDD(lambda entries: send_partition(entries, table_name))
 
-    def send_partition(entries, table_name):
+    def send_partition(entries):
         """
         Collects rdd entries and sends as batch of CQL commands.
         Required by "save_to_database" function.
         """
         # Initializes keyspace and CQL batch executor in Cassandra database
-        db_cass = cassc.Cluster(p["cassandra"]).connect(p["cassandra_key"])
+        db_cass = cassc.Cluster([p["cassandra"]]).connect(p["cassandra_key"])
         cmd_batch = cassq.BatchStatement(consistency_level=cass.ConsistencyLevel.QUORUM)
         cmd_size = 0
     
@@ -134,14 +134,14 @@ if __name__ == "__main__":
     sc = SparkContext(appName=p["spark_name"])
     sc.setLogLevel("WARN")
     ssc = StreamingContext(sc, 30)
-    kafka_stream = kfk.createDirectStream(ssc, p["kafka_topic"], {"bootstrap.servers": p["kafka_broker"]})
+    kafka_stream = kfk.createDirectStream(ssc, [p["kafka_topic"]], {"bootstrap.servers": p["kafka_broker"]})
 
     # For each micro-RDD, strips whitespace and split by comma
     parsed_rdd = kafka_stream.map(lambda ln: (x.strip() for x in ln[1].strip().split(",")))
 
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
     summed_rdd = summarize_step_data(parsed_rdd)
-    #summed_rdd.persist()
+    summed_rdd.persist()
 
     # Transforms overall values to CQL format for storage in Cassandra database
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <total energy>)
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     save_to_database(power_rdd, "power")
 
     # Unpersists overall values RDD
-    #summed_rdd.unpersist()
+    summed_rdd.unpersist()
 
     # Starts and stops spark streaming context
     ssc.start()
