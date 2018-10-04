@@ -139,8 +139,9 @@ if __name__ == "__main__":
 
     # For each micro-RDD, strips whitespace and split by comma
     parsed_rdd = kafka_stream.map(lambda ln: (x.strip() for x in ln[1].strip().split(",")))
+    parsed_rdd.cache()
+    parsed_rdd.pprint(5)
     
-
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
     #summed_rdd = summarize_step_data(parsed_rdd)
     #summed_rdd.persist()
