@@ -111,6 +111,7 @@ def save_to_database(input_rdd, table_name):
     Requires "send_partition" function.
     """
     #input_rdd.foreachRDD(lambda rdd: rdd.foreachPartition(lambda entries: send_partition(entries, table_name)))
+    print(type(input_rdd))
     input_rdd.foreachRDD(lambda entries: send_partition(entries, table_name))
     return None
 
