@@ -55,7 +55,7 @@ def setup_connection(p):
     cmd_batch = cassq.BatchStatement(consistency_level=cass.ConsistencyLevel.QUORUM)
     return db_cass, cmd_batch
 
-def reset_table(table_name, db_cass):
+def reset_table(table_name, db_cass, cql_batch):
     """
     """
     # Creates CQL command for dropping existing table
