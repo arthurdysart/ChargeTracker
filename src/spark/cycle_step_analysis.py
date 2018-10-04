@@ -139,20 +139,21 @@ if __name__ == "__main__":
 
     # For each micro-RDD, strips whitespace and split by comma
     parsed_rdd = kafka_stream.map(lambda ln: (x.strip() for x in ln[1].strip().split(",")))
+    
 
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
-    summed_rdd = summarize_step_data(parsed_rdd)
+    #summed_rdd = summarize_step_data(parsed_rdd)
     #summed_rdd.persist()
 
     # Transforms overall values to CQL format for storage in Cassandra database
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <total energy>)
-    energy_rdd = summed_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[1][0]))
-    save_to_database(energy_rdd, "energy")
+    #energy_rdd = summed_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[1][0]))
+    #save_to_database(energy_rdd, "energy")
 
     # Transforms overall values to CQL format for storage in Cassandra database
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <average power>)
-    power_rdd = summed_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[1][1]))
-    save_to_database(power_rdd, "power")
+    #power_rdd = summed_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[1][1]))
+    #save_to_database(power_rdd, "power")
 
     # Unpersists overall values RDD
     #summed_rdd.unpersist()
