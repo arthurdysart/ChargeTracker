@@ -114,11 +114,11 @@ def save_to_database(input_rdd, table_name):
     Requires "send_partition" function.
     """
     # ConnectionPool is a static, lazily initialized pool of connections
-    connection = ConnectionPool.getConnection()
-    for record in input_rdd:
-        connection.send(record)
+    #connection = ConnectionPool.getConnection()
+    #for record in input_rdd:
+    #    connection.send(record)
     # return to the pool for future reuse
-    ConnectionPool.returnConnection(connection)
+    #ConnectionPool.returnConnection(connection)
 
     input_rdd.foreachRDD(lambda rdd: rdd.foreachPartition(lambda entries: send_partition(entries, table_name)))
     #input_rdd.foreachRDD(lambda entries: send_partition(entries, table_name))
