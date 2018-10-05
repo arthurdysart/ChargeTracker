@@ -139,6 +139,15 @@ def save_to_database(input_rdd, table_name):
             send_partition(entries, table_name)))
     return None
 
+def save_to_file(input_rdd, file_name):
+    """
+    For each micro-RDD, saves input data to text file.
+    """
+    input_rdd.foreachRDD(lambda rdd: \
+        rdd.foreachPartition(lambda entries: \
+                             open(file_name, "a").write(entries)))
+    return None
+
 
 ## MAIN MODULE
 if __name__ == "__main__":
@@ -157,21 +166,26 @@ if __name__ == "__main__":
     parsed_rdd = kafka_stream.map(lambda ln: tuple(x.strip() for x in ln[1].strip().split(",")))
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
     summary_rdd = summarize_step_data(parsed_rdd)
+    summary_rdd.saveAsTextFiles("./dstream_stdout/summary")
+
 
     # Transforms overall values to CQL format for storage in Cassandra database
-    # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <total energy>)
-    energy_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[1]))
-    save_to_database(energy_rdd, "capacity")
+    # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <total capacity>)
+    capacity_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[1]))
+    save_to_database(capacity_rdd, "capacity")
+    capacity_rdd.saveAsTextFiles("./dstream_stdout/capacity")
 
     # Transforms overall values to CQL format for storage in Cassandra database
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <total energy>)
     energy_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[2]))
     save_to_database(energy_rdd, "energy")
+    energy_rdd.saveAsTextFiles("./dstream_stdout/energy")
 
     # Transforms overall values to CQL format for storage in Cassandra database
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <average power>)
     power_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[3]))
     save_to_database(power_rdd, "power")
+    power_rdd.saveAsTextFiles("./dstream_stdout/power")
 
     # Starts and stops spark streaming context
     ssc.start()
