@@ -64,6 +64,9 @@ def summarize_step_data(parsed_rdd):
     # HOW TO IDENTIFY AS PAIR RDD?
     paired_rdd = parsed_rdd.map(lambda x: ((int(x[0]), str(x[1]), int(x[2]), str(x[3]),), (str(x[4]), float(x[5]), float(x[6]), float(x[7]), float(x[8]),)))
 
+
+    # ORDER BY DATA?
+
     # Calculates instantaneous capacity, energy, and power for each entry
     # SCHEMA: (key) : (<capacity: float>, <energy: float>, <power: float>, <counts: int>)
     inst_rdd = paired_rdd.map(lambda x: (x[0],
@@ -152,7 +155,6 @@ if __name__ == "__main__":
 
     # For each micro-RDD, strips whitespace and split by comma
     parsed_rdd = kafka_stream.map(lambda ln: tuple(x.strip() for x in ln[1].strip().split(",")))
-
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
     summary_rdd = summarize_step_data(parsed_rdd)
 
