@@ -166,7 +166,7 @@ if __name__ == "__main__":
     parsed_rdd = kafka_stream.map(lambda ln: tuple(x.strip() for x in ln[1].strip().split(",")))
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
     summary_rdd = summarize_step_data(parsed_rdd)
-    save_to_file(summary_rdd, "./dstream_stdout/summary.txt")
+    save_to_file(summary_rdd, "/home/ubuntu/overview/src/spark/dstream_stdout/summary.txt")
     #summary_rdd.saveAsTextFiles("./dstream_stdout/summary")
 
 
@@ -174,21 +174,21 @@ if __name__ == "__main__":
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <total capacity>)
     capacity_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[1]))
     save_to_database(capacity_rdd, "capacity")
-    save_to_file(capacity_rdd, "./dstream_stdout/capacity.txt")
+    save_to_file(capacity_rdd, "/home/ubuntu/overview/src/spark/dstream_stdout/capacity.txt")
     #capacity_rdd.saveAsTextFiles("./dstream_stdout/capacity")
 
     # Transforms overall values to CQL format for storage in Cassandra database
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <total energy>)
     energy_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[2]))
     save_to_database(energy_rdd, "energy")
-    save_to_file(energy_rdd, "./dstream_stdout/energy.txt")
+    save_to_file(energy_rdd, "/home/ubuntu/overview/src/spark/dstream_stdout/energy.txt")
     #energy_rdd.saveAsTextFiles("./dstream_stdout/energy")
 
     # Transforms overall values to CQL format for storage in Cassandra database
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>, <average power>)
     power_rdd = summary_rdd.map(lambda x: (x[0][0], x[0][1], x[0][2], x[0][3], x[3]))
     save_to_database(power_rdd, "power")
-    save_to_file(power_rdd, "./dstream_stdout/power.txt")
+    save_to_file(power_rdd, "/home/ubuntu/overview/src/spark/dstream_stdout/power.txt")
     #power_rdd.saveAsTextFiles("./dstream_stdout/power")
 
     # Starts and stops spark streaming context
