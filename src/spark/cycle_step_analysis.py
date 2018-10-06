@@ -143,7 +143,7 @@ def save_to_file(input_rdd, file_name):
     """
     For each micro-RDD, saves input data to text file.
     """
-    input_rdd.foreachRDD(lambda rdd: open(file_name, "a").write(", ".join(rdd.collect()) + "\n"))
+    input_rdd.foreachRDD(lambda rdd: open(file_name, "a").write(str(rdd.collect()) + "\n"))
     return None
 
 
