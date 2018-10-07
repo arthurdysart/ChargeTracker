@@ -42,7 +42,7 @@ def stdin(sys_argv):
         p["spark_name"]= settings.get("SPARK_NAME")
         p["cassandra"] = settings.get("CASSANDRA_MASTER", cast=dc.Csv())
         p["cassandra_key"] = settings.get("CASSANDRA_KEYSPACE")
-        p["kafka_broker"] = settings.get("KAFKA_BROKER")
+        p["kafka_broker"] = settings.get("KAFKA_BROKER", cast=dc.Csv())
         p["kafka_topic"] = settings.get("KAFKA_TOPIC", cast=dc.Csv())
     except:
         raise ValueError("Cannot interpret external settings. Check ENV file.")
@@ -194,12 +194,11 @@ if __name__ == "__main__":
                                           {"bootstrap.servers": \
                                               p["kafka_broker"]})
 
-    # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
+    # For each micro-RDD, transforms measurements to summary/overall values
     summary_rdd = summarize_step_data(kafka_stream)
     #summary_rdd.pprint(4)
 
     # For each cathode, filters data and sends to Cassandra database
-    #for cathode in ["W", "X", "Y", "Z"]:
     filtered_rdd_w = summary_rdd.filter(lambda x: x[0] == "W")
     filtered_rdd_w.pprint(4)
     save_to_database(filtered_rdd_w, "W")
