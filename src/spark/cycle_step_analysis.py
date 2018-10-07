@@ -203,7 +203,7 @@ if __name__ == "__main__":
 
     # For each cathode, filters data and sends to Cassandra database
     for cathode in ["W", "X", "Y", "Z"]:
-        filtered_rdd = summary_rdd.filter(lambda x: str(x[0]).upper() == cathode)
+        filtered_rdd = summary_rdd.filter(lambda x: str(x[0]).upper() != cathode)
         filtered_rdd.pprint(10)
         save_to_database(filtered_rdd, "cathode_{}".format(cathode))
 
