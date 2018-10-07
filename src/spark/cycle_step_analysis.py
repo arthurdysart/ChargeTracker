@@ -137,10 +137,6 @@ def send_partition(entries, table_name, crit_size=500):
 
     for e in entries:
         # Interpolates prepared CQL statement with values from entry
-        print("*****************************************************")
-        print("{}".format(e))
-        print("{}".format(type(e)))
-        print("*****************************************************")
         cql_batch.add(cql_command, parameters= \
                       [cassq.ValueSequence((e[1],)), \
                        cassq.ValueSequence((e[2],)), \
@@ -203,7 +199,7 @@ if __name__ == "__main__":
 
     # For each cathode, filters data and sends to Cassandra database
     for cathode in ["W", "X", "Y", "Z"]:
-        filtered_rdd = summary_rdd.filter(lambda x: str(x[0]).upper() != cathode)
+        filtered_rdd = summary_rdd.filter(lambda x: cathode == x[0].upper())
         filtered_rdd.pprint(10)
         save_to_database(filtered_rdd, cathode)
 
