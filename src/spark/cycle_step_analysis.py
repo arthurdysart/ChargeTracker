@@ -196,13 +196,25 @@ if __name__ == "__main__":
 
     # For each micro-RDD, transforms instantaneous measurements to overall values in RDD
     summary_rdd = summarize_step_data(kafka_stream)
-    summary_rdd.pprint(4)
+    #summary_rdd.pprint(4)
 
     # For each cathode, filters data and sends to Cassandra database
-    for cathode in ["W", "X", "Y", "Z"]:
-        filtered_rdd = summary_rdd.filter(lambda x: str(x[0]).upper() == cathode)
-        filtered_rdd.pprint(4)
-        save_to_database(filtered_rdd, cathode)
+    #for cathode in ["W", "X", "Y", "Z"]:
+    filtered_rdd_w = summary_rdd.filter(lambda x: x[0] == "W")
+    filtered_rdd_w.pprint(4)
+    save_to_database(filtered_rdd_w, "W")
+
+    filtered_rdd_x = summary_rdd.filter(lambda x: x[0] == "X")
+    filtered_rdd_x.pprint(4)
+    save_to_database(filtered_rdd_x, "X")
+
+    filtered_rdd_y = summary_rdd.filter(lambda x: x[0] == "Y")
+    filtered_rdd_y.pprint(4)
+    save_to_database(filtered_rdd_y, "Y")
+
+    filtered_rdd_z = summary_rdd.filter(lambda x: x[0] == "Z")
+    filtered_rdd_z.pprint(4)
+    save_to_database(filtered_rdd_z, "Z")
 
     # Starts and stops spark streaming context
     ssc.start()
