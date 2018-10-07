@@ -193,7 +193,7 @@ if __name__ == "__main__":
     summary_rdd = summarize_step_data(kafka_stream)
 
     # For each cathode, filters data and sends to Cassandra database
-    for cathode in ["W", "X", "Y", "Z"]:
+    for cathode in ["cathode_W", "cathode_X", "cathode_Y", "cathode_Z"]:
         filtered_rdd = summary_rdd.filter(lambda x: cathode in x[0])
         save_to_database(filtered_rdd, cathode)
 
