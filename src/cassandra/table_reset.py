@@ -3,20 +3,16 @@ from __future__ import print_function
 """
 Calculates capacity, energy, and power values for sample battery data.
 
-Existing sample data "battery_stdout.txt" generated from Kafka connect using the following command: python battery.py 1 10 1200 2.0 4.5
-
 Template:
 python table_reset.py <table-name-1> <table-name-2> ... <table-name-N>
 
 Example:
-python table_reset.py "energy" "power"
+python table_reset.py "W" "X" "Y" "Z"
 """
 
 
 ## MODULE IMPORTS
-import cassandra as cass
 import cassandra.cluster as cassc
-import cassandra.query as cassq
 import decouple as dc
 import os
 import sys
@@ -43,7 +39,7 @@ def stdin(sys_argv):
         p["cassandra_key"] = settings.get("CASSANDRA_KEYSPACE")
         table_names = [name for name in sys_argv[1:]]
     except:
-        raise ValueError("Cannot interpret parameters. Check terminal input.")
+        raise ValueError("Cannot interpret parameters. Check input.")
 
     return table_names, p
 
@@ -51,25 +47,36 @@ def setup_connection(p):
     """
     Initializes Cassandra CQL session and batch CQL statement executor.
     """
-    db_cass = cassc.Cluster(p["cassandra"]).connect(p["cassandra_key"])
-    cmd_batch = cassq.BatchStatement(consistency_level=cass.ConsistencyLevel.QUORUM)
-    return db_cass, cmd_batch
+    db_cass = cassc \
+        .Cluster(p["cassandra"]) \
+        .connect(p["cassandra_key"])
+    return db_cass
 
-def reset_table(table_name, db_cass, cql_batch):
+def reset_table(table_name, db_cass):
     """
     Creates and executes CQL commands to drop and re-create Cassandra tables.
     """
     print("Respawning table {} ...".format(table_name))
 
     # Creates CQL command for dropping existing table
-    cql_drop = """ DROP TABLE IF EXISTS {}; """.format(table_name)
+    cql_drop = """
+        DROP TABLE IF EXISTS {};
+        """.format(table_name)
     db_cass.execute(cql_drop)
 
     # Creates CQL command for creating table
-    cql_create = """ CREATE TABLE IF NOT EXISTS {}(id int, cathode text,
-    cycle int, step text, {} float, PRIMARY KEY(id, cathode, cycle, step))
-    WITH CLUSTERING ORDER BY (cathode DESC, cycle DESC); """ \
-    .format(table_name, table_name)
+    cql_create = """
+        CREATE TABLE IF NOT EXISTS {}
+        (id int,
+        cycle int,
+        step text,
+        capacity list<double>,
+        energy list<double>,
+        power list<double>,
+        counts list<int>,
+        PRIMARY KEY((step), id, cycle))
+        WITH CLUSTERING ORDER BY (id DESC, cycle DESC);
+        """.format(table_name)
     db_cass.execute(cql_create)
 
     return 1
@@ -77,16 +84,15 @@ def reset_table(table_name, db_cass, cql_batch):
 
 ## MAIN MODULE
 if __name__ == "__main__":
-    # Imports standard input
+    # Imports standard input and sets Cassandra connection
     table_names, p = stdin(sys.argv)
+    db_cass = setup_connection(p)
 
-    # Setup Cassandra cluster connection
-    db_cass, cql_batch = setup_connection(p)
+    # Creates and executes all CQL commands for table reset
+    count = sum(reset_table(name, db_cass) for name in table_names)
 
-    # Creates all CQL commands for table reset
-    count = sum(reset_table(name, db_cass, cql_batch) for name in table_names)
+    # Ends CQL session and displays completion statement to standard output
     db_cass.shutdown()
-
     print("Reset {} tables: {}".format(count, ", ".join(table_names)))
 
 
