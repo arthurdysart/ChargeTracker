@@ -128,7 +128,7 @@ def send_partition(entries, table_name, crit_size=500):
                                   power = [ ? ] + power,
                                   counts = [ ? ] + counts
                                   WHERE step = ? AND cycle = ? AND id = ?;
-                                  """.format(table_name)))
+                                  """.format(table_name))
 
     # Iterates over all entries in rdd partition
     for entry in entries:
