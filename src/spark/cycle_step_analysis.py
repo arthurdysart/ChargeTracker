@@ -137,6 +137,10 @@ def send_partition(entries, table_name, crit_size=500):
 
     for e in entries:
         # Interpolates prepared CQL statement with values from entry
+        print("*****************************************************")
+        print("{}".format(e))
+        print("{}".format(type(e)))
+        print("*****************************************************")
         cql_batch.add(cql_command, parameters= \
                       [cassq.ValueSequence((e[1],)), \
                        cassq.ValueSequence((e[2],)), \
