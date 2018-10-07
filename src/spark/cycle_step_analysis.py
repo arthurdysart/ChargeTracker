@@ -120,15 +120,15 @@ def send_partition(entries, table_name, crit_size=500):
                                      cass.ConsistencyLevel.QUORUM)
     batch_size = 0
 
-    # Prepares CQL statement with placeholders
+    # Prepares CQL statement, with interpolated table name, and placeholders
     cql_command = db_cass.prepare("""
-                                  UPDATE ? SET
+                                  UPDATE {} SET
                                   capacity = [ ? ]+ capacity,
                                   energy = [ ? ] + energy,
                                   power = [ ? ] + power,
                                   counts = [ ? ] + counts
                                   WHERE step = ? AND cycle = ? AND id = ?;
-                                  """)
+                                  """.format(table_name)))
 
     # Iterates over all entries in rdd partition
     for entry in entries:
@@ -152,6 +152,7 @@ def save_to_database(input_rdd, table_name):
     For each micro-RDD, sends partition to target database.
     Requires "send_partition" function.
     """
+    input_rdd.pprint(5)
     input_rdd.foreachRDD(lambda rdd: \
         rdd.foreachPartition(lambda entries: \
             send_partition(entries, table_name)))
@@ -188,7 +189,8 @@ if __name__ == "__main__":
     # For each cathode, filters data and sends to Cassandra database
     for cathode in ["W", "X", "Y", "Z"]:
         filtered_rdd = summary_rdd.filter(lambda x: cathode in x[0])
-        save_to_database(filtered_rdd, cathode)
+        filtered_rdd.pprint(5)
+        save_to_database(filtered_rdd.map(lambda x: x[1:]), cathode)
 
     # Starts and stops spark streaming context
     ssc.start()
