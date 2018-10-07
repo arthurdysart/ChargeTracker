@@ -123,16 +123,23 @@ def send_partition(entries, table_name, crit_size=500):
     # Prepares CQL statement, with interpolated table name, and placeholders
     cql_command = db_cass.prepare("""
                                   UPDATE {} SET
-                                  capacity = [ ? ]+ capacity,
-                                  energy = [ ? ] + energy,
-                                  power = [ ? ] + power,
-                                  counts = [ ? ] + counts
+                                  capacity =  ? + capacity,
+                                  energy = ? + energy,
+                                  power = ? + power,
+                                  counts = ? + counts
                                   WHERE step = ? AND cycle = ? AND id = ?;
                                   """.format(table_name))
 
-    # Iterates over all entries in rdd partition
-    for entry in entries:
-        cql_batch.add(cql_command, entry)
+    for e in entries:
+        # Interpolates prepared CQL statement with values from entry
+        cql_batch.add(cql_command, parameters= \
+                      [cassq.ValueSequence(e[1]), \
+                       cassq.ValueSequence(e[2]), \
+                       cassq.ValueSequence(e[3]), \
+                       cassq.ValueSequence(e[4]), \
+                       e[5], \
+                       e[6], \
+                       e[7],])
         batch_size += 1
         # Executes collected CQL commands, then re-initializes collection
         if batch_size == crit_size:
@@ -152,7 +159,6 @@ def save_to_database(input_rdd, table_name):
     For each micro-RDD, sends partition to target database.
     Requires "send_partition" function.
     """
-    input_rdd.pprint(5)
     input_rdd.foreachRDD(lambda rdd: \
         rdd.foreachPartition(lambda entries: \
             send_partition(entries, table_name)))
@@ -189,8 +195,7 @@ if __name__ == "__main__":
     # For each cathode, filters data and sends to Cassandra database
     for cathode in ["W", "X", "Y", "Z"]:
         filtered_rdd = summary_rdd.filter(lambda x: cathode in x[0])
-        filtered_rdd.pprint(5)
-        save_to_database(filtered_rdd.map(lambda x: x[1:]), cathode)
+        save_to_database(filtered_rdd, cathode)
 
     # Starts and stops spark streaming context
     ssc.start()
