@@ -122,12 +122,12 @@ def send_partition(entries, table_name, crit_size=500):
 
     # Prepares CQL statement with placeholders
     cql_command = db_cass.prepare("""
-                                  UPDATE %s SET
-                                  capacity = [ %s ]+ capacity,
-                                  energy = [ %s ] + energy,
-                                  power = [ %s ] + power,
-                                  counts = [ %s ] + counts
-                                  WHERE step = %s AND cycle = %s AND id = %s;
+                                  UPDATE ? SET
+                                  capacity = [ ? ]+ capacity,
+                                  energy = [ ? ] + energy,
+                                  power = [ ? ] + power,
+                                  counts = [ ? ] + counts
+                                  WHERE step = ? AND cycle = ? AND id = ?;
                                   """)
 
     # Iterates over all entries in rdd partition
