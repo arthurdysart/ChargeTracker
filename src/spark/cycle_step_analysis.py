@@ -62,7 +62,7 @@ def summarize_step_data(kafka_stream):
     # For each micro-RDD, strips whitespace and split by comma
     parsed_rdd = kafka_stream.map(lambda ln: \
         tuple(x.strip() for x in ln[1].strip().split(",")))
-    parsed_rdd.pprint(3)
+    #parsed_rdd.pprint(3)
 
     # Transforms parsed entries into key-value pair
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>) :
@@ -71,7 +71,7 @@ def summarize_step_data(kafka_stream):
     paired_rdd = parsed_rdd.map(lambda x: \
         ((int(x[0]), str(x[1]), int(x[2]), str(x[3]),), \
          (str(x[4]), float(x[5]), float(x[6]), float(x[7]), float(x[8]),)))
-    paired_rdd.pprint(3)
+    #paired_rdd.pprint(3)
     
     # Calculates instantaneous capacity, energy, and power for each entry
     # SCHEMA: (key) :
@@ -83,7 +83,7 @@ def summarize_step_data(kafka_stream):
          x[1][2] * (x[1][1] + x[1][3]) * DELTA_TIME / (2 * ENG_CONVERSION), \
          x[1][2] * x[1][1] / PWR_CONVERSION, \
          1,)))
-    inst_rdd.pprint(3)
+    #inst_rdd.pprint(3)
 
     # Calculates total capacity and energy, and power sum for each key
     # SCHEMA: (key) :
@@ -94,7 +94,7 @@ def summarize_step_data(kafka_stream):
          i[1] + j[1], \
          i[2] + j[2], \
          i[3] + j[3],))
-    total_rdd.pprint(3)
+    #total_rdd.pprint(3)
 
     # Re-organizes key and value contents for Cassandra CQL interpolation
     # SCHEMA: <cathode: str>, <total capacity: float>, <total energy: float>,
@@ -109,7 +109,7 @@ def summarize_step_data(kafka_stream):
          x[0][3], \
          x[0][2], \
          x[0][0],))
-    summary_rdd.pprint(3)
+    #summary_rdd.pprint(3)
 
     return summary_rdd
 
@@ -204,6 +204,7 @@ if __name__ == "__main__":
     # For each cathode, filters data and sends to Cassandra database
     for cathode in ["cathode_W", "cathode_X", "cathode_Y", "cathode_Z"]:
         filtered_rdd = summary_rdd.filter(lambda x: str(x[0]) in cathode)
+        filtered_rdd.pprint(10)
         save_to_database(filtered_rdd, cathode)
 
     # Starts and stops spark streaming context
