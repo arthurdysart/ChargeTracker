@@ -42,7 +42,7 @@ def stdin(sys_argv):
         p["spark_name"]= settings.get("SPARK_NAME")
         p["cassandra"] = settings.get("CASSANDRA_MASTER", cast=dc.Csv())
         p["cassandra_key"] = settings.get("CASSANDRA_KEYSPACE")
-        p["kafka_broker"] = settings.get("KAFKA_BROKER", cast=dc.Csv())
+        p["kafka_broker"] = settings.get("KAFKA_BROKER", cast=dc.Csv())[0]
         p["kafka_topic"] = settings.get("KAFKA_TOPIC", cast=dc.Csv())
     except:
         raise ValueError("Cannot interpret external settings. Check ENV file.")
