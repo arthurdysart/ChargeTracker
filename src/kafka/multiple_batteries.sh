@@ -23,5 +23,5 @@ for BATTERY_ID in `seq 1 $NUMBER_BATTERIES`;
 do
     echo "Battery ID# $BATTERY_ID ..."
     tmux new-window -t $BATTERY_ID
-    tmux send-keys -t $TMUX_SESSION_NAME:$BATTERY_ID 'python battery_python-kafka.py '"$BATTERY_ID"'' '"$NUMBER_CYCLES"'' '"$CURRENT"'' '"$LOW_VOLT"'' '"$HIGH_VOLT"'' C-m
+    tmux send-keys -t $TMUX_SESSION_NAME:$BATTERY_ID 'python battery_python-kafka.py '"$BATTERY_ID"' '"$NUMBER_CYCLES"' '"$CURRENT"' '"$LOW_VOLT"' '"$HIGH_VOLT"'' C-m
 done
