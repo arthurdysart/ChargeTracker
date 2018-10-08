@@ -185,6 +185,9 @@ def save_to_file(input_rdd, file_name):
 if __name__ == "__main__":
     # Sets Kafka and Cassandra parameters
     p = stdin(sys.argv)
+    print("*****************************************************************")
+    print(p["kafka_broker"])
+    print("*****************************************************************")
     # Initializes spark context SC and streaming context SCC
     sc = SparkContext(appName=p["spark_name"])
     sc.setLogLevel("WARN")

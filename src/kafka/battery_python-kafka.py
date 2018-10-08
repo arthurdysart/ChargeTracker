@@ -129,6 +129,7 @@ if __name__ == "__main__":
     p = stdin(sys.argv)
 
     # Creates Kafka producer
+    print(p["kafka_broker"])
     kafka_prod = kk.KafkaProducer(bootstrap_servers=p["kafka_broker"])
 
     # Generates data for each battery cycle, and publishes to Kafka broker
