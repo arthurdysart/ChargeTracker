@@ -58,6 +58,43 @@ def reset_table(table_name, db_cass):
     """
     print("Respawning table {} ...".format(table_name))
 
+    # Creates CQL command for keyspace
+    cql_keyspace = """
+        CREATE KEYSPACE IF NOT EXISTS battery_data
+        WITH replication =
+        {'class': 'SimpleStrategy',
+        'replication_factor' : 3};
+        """
+    db_cass.execute(cql_keyspace)
+
+
+    # Creates CQL command for dropping existing table
+    cql_double_sum = """
+        CREATE OR REPLACE FUNCTION
+        double_sum (collection list<double>)
+        CALLED ON NULL INPUT
+        RETURNS double
+        LANGUAGE java AS
+        'double sum = 0;
+        for (double i: collection)
+        { sum += i; }
+        return sum;';
+        """
+    db_cass.execute(cql_double_sum)
+
+    cql_int_sum = """
+        CREATE OR REPLACE FUNCTION
+        int_sum (collection list<int>)
+        CALLED ON NULL INPUT
+        RETURNS int
+        LANGUAGE java AS
+        'int sum = 0;
+        for (int i: collection)
+        { sum += i; }
+        return sum;';
+        """
+    db_cass.execute(cql_int_sum)
+
     # Creates CQL command for dropping existing table
     cql_drop = """
         DROP TABLE IF EXISTS {};
