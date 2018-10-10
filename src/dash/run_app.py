@@ -57,7 +57,7 @@ def update_summary_graph(interval):
     df_capacity = query_cassandra("""
                                   SELECT step, id, cathode, cycle,
                                   double_sum(capacity) AS sum_capacity
-                                  FROM X WHERE step = 'D';
+                                  FROM battery_data WHERE step = 'D';
                                   """)
 
     print(df_capacity)
