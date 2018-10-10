@@ -93,7 +93,7 @@ if __name__ == "__main__":
     cass_db.default_fetch_size = None
 
     # Starts Flask/Dash app
-    app.run_server(debug=True, host="0.0.0.0", port=80)
+    app.run_server(debug=True, port=80)
 
 
 ## END OF FILE
