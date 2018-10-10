@@ -132,7 +132,8 @@ def send_partition(entries, table_name, crit_size=500):
                                   energy = ? + energy,
                                   power = ? + power,
                                   counts = ? + counts
-                                  WHERE step = ? AND cycle = ? AND id = ?;
+                                  WHERE cathode = ? AND step = ?
+                                  AND cycle = ? AND id = ?;
                                   """.format(table_name))
 
     for e in entries:
@@ -142,6 +143,7 @@ def send_partition(entries, table_name, crit_size=500):
                        cassq.ValueSequence((e[2],)), \
                        cassq.ValueSequence((e[3],)), \
                        cassq.ValueSequence((e[4],)), \
+                       e[0], \
                        e[5], \
                        e[6], \
                        e[7],])
@@ -185,9 +187,6 @@ def save_to_file(input_rdd, file_name):
 if __name__ == "__main__":
     # Sets Kafka and Cassandra parameters
     p = stdin(sys.argv)
-    print("*****************************************************************")
-    print(p["kafka_broker"])
-    print("*****************************************************************")
     # Initializes spark context SC and streaming context SCC
     sc = SparkContext(appName=p["spark_name"])
     sc.setLogLevel("WARN")
@@ -199,24 +198,9 @@ if __name__ == "__main__":
 
     # For each micro-RDD, transforms measurements to summary/overall values
     summary_rdd = summarize_step_data(kafka_stream)
-    #summary_rdd.pprint(4)
 
     # For each cathode, filters data and sends to Cassandra database
-    filtered_rdd_w = summary_rdd.filter(lambda x: x[0] == "W")
-    filtered_rdd_w.pprint(4)
-    save_to_database(filtered_rdd_w, "W")
-
-    filtered_rdd_x = summary_rdd.filter(lambda x: x[0] == "X")
-    filtered_rdd_x.pprint(4)
-    save_to_database(filtered_rdd_x, "X")
-
-    filtered_rdd_y = summary_rdd.filter(lambda x: x[0] == "Y")
-    filtered_rdd_y.pprint(4)
-    save_to_database(filtered_rdd_y, "Y")
-
-    filtered_rdd_z = summary_rdd.filter(lambda x: x[0] == "Z")
-    filtered_rdd_z.pprint(4)
-    save_to_database(filtered_rdd_z, "Z")
+    save_to_database(summary_rdd, "battery_data")
 
     # Starts and stops spark streaming context
     ssc.start()

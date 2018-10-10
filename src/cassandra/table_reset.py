@@ -67,7 +67,6 @@ def reset_table(table_name, db_cass):
         """
     db_cass.execute(cql_keyspace)
 
-
     # Creates CQL command for dropping existing table
     cql_double_sum = """
         CREATE OR REPLACE FUNCTION
@@ -104,14 +103,15 @@ def reset_table(table_name, db_cass):
     # Creates CQL command for creating table
     cql_create = """
         CREATE TABLE IF NOT EXISTS {}
-        (id int,
+        (cathode text,
+        id int,
         cycle int,
         step text,
         capacity list<double>,
         energy list<double>,
         power list<double>,
         counts list<int>,
-        PRIMARY KEY((step), id, cycle))
+        PRIMARY KEY((step, cathode), id, cycle))
         WITH CLUSTERING ORDER BY (id DESC, cycle DESC);
         """.format(table_name)
     db_cass.execute(cql_create)
