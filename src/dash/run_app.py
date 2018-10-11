@@ -1,8 +1,8 @@
 """
-Displays summary visual showing aggreagated battery data 
+Displays summary visual showing aggreagated battery data.
 
-
-
+Template:
+sudo python run_app.py
 """
 
 # IMPORTED LIBRARIES
