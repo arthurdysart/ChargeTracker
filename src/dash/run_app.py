@@ -1,8 +1,8 @@
 """
-Display errors in realtime from simulated server lab tests
-Graph displays percent of servers impacted per (SW,HW) config on x axis
-Graph displays percent of tests with errors per (SW,HW) config on the y axis
-Hover over each marker to get error counts and number of servers impacted 
+Displays summary visual showing aggreagated battery data 
+
+
+
 """
 
 # IMPORTED LIBRARIES
@@ -53,7 +53,8 @@ def update_summary_graph(interval):
     """
     Queries table, analyzes data, and assembles results in proper Dash format. 
     """
-    # Pulls all data from Cassandra
+    # Pulls all data from Cassandra into Pandas dataframe
+    # TODO: Fix table schema?
     df_capacity = query_cassandra("""
                                   SELECT step, id, cathode, cycle,
                                   double_sum(capacity) AS sum_capacity
@@ -61,27 +62,40 @@ def update_summary_graph(interval):
                                   ALLOW FILTERING;
                                   """)
 
-    print(df_capacity)
     # Analyzes dataframe to report average results
+    grouped_data = df_capacity.groupby(["cathode", "cycle", "step"])
+    df_capacity_mean = pd.DataFrame({'capacity_mean' : grouped_data["sum_capacity"].mean()}).reset_index()
+    df_capacity_stdev = pd.DataFrame({'capacity_stdev' : grouped_data["sum_capacity"].std()}).reset_index()
+    df_capacity_count = pd.DataFrame({'capacity_count' : grouped_data["sum_capacity"].count()}).reset_index()
+
+    # Concatenates all calculated values according to 
+    # SCHEMA: <cathode>, <cycle>, <capacity-mean>, <capacity-stdev>, <capacity-count>
+    mean_stdev = pd.merge(df_capacity_mean, df_capacity_stdev, on=["cathode", "cycle"], how="inner")
+    mean_stdev_counts = pd.merge(mean_stdev, df_capacity_count, on=["cathode", "cycle"], how="inner")
 
     # Retrieves x and y data to be plotted on graph
-    x = df_capacity["cycle"]
-    y = df_capacity["sum_capacity"]
+    x_cycles = mean_stdev_counts["cycle"].tolist()
+    y_mean = mean_stdev_counts["capacity_mean"].tolist()
+    y_error = mean_stdev_counts["capacity_stdev"].tolist()
+    y_percent_error = y_error / mean_stdev_counts["capacity_mean"].tolist()
 
     # Creates mouseover text (index corresponds to index of x and y datasets)
-    all_cathode = df_capacity["cathode"].tolist()
-    all_step = df_capacity["step"].tolist()
-    all_id = df_capacity["id"].tolist()
-    metadata = zip(all_id, all_cathode, all_step)
-    mouseover_text = ["Battery ID: {}\nCathode: {}\nStep: {}".format(bid, cathode, step) for bid, cathode, step in metadata]
+    text_steps = mean_stdev_counts["step"].tolist()
+    text_cathodes = mean_stdev_counts["cathode"].tolist()
+    text_counts = mean_stdev_counts["capacity_count"].tolist()
+    metadata = zip(text_cathodes, text_counts, text_steps, y_mean, y_percent_error)
+    mouseover_text = ["Step:{}   Chemistry group:{}   Number batteries:{}   Average:{} Ah +/- {} %".format(*t) for t in metadata]
 
     # Assembles data (X and Y data as lists) and layout parameters for Dash
-    data=[{"x": x,
-           "y": y,
+    data=[{"x": x_cycles,
+           "y": y_mean,
            "mode": "markers",
-           "text": mouseover_text},]
-    layout={"height": 500, \
-            "xaxis": {"title": "Cycle number"}, \
+           "text": mouseover_text,
+           "error_y": {"type": "data",
+                       "array": y_error,
+                       "visible": True,},},]
+    layout={"height": 500,
+            "xaxis": {"title": "Cycle number"},
             "yaxis": {"title": "Measured capacity  (mAh)"},}
 
     return Figure(data=data, layout=layout)
