@@ -77,7 +77,7 @@ def update_summary_graph(interval):
     x_cycles = mean_stdev_counts["cycle"].tolist()
     y_mean = mean_stdev_counts["capacity_mean"].tolist()
     y_error = mean_stdev_counts["capacity_stdev"].tolist()
-    y_percent_error = y_error / mean_stdev_counts["capacity_mean"].tolist()
+    y_percent_error = (mean_stdev_counts["capacity_stdev"] / mean_stdev_counts["capacity_mean"]).tolist()
 
     # Creates mouseover text (index corresponds to index of x and y datasets)
     text_steps = mean_stdev_counts["step"].tolist()
