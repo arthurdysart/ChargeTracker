@@ -19,7 +19,8 @@ import pandas as pd
 
 # Sets cassandra database and Flask app as global variables
 cass_db = Cluster(["10.0.0.74"]).connect("battery_data")
-app = dash.Dash("Charge_Tracker")
+app = dash.Dash("Charge_Tracker",
+                external_stylesheets=["https://codepen.io/chriddyp/pen/bWLwgP.css"])
 server = app.server
 app.layout = html.Div([html.Div([dcc.Graph(id="capacity_tracker"),],
                                 style={"width": "100%",
@@ -83,8 +84,16 @@ def update_summary_graph(interval):
     text_steps = mean_stdev_counts["step"].tolist()
     text_cathodes = mean_stdev_counts["cathode"].tolist()
     text_counts = mean_stdev_counts["capacity_count"].tolist()
-    metadata = zip(text_cathodes, text_counts, text_steps, y_mean, y_percent_error)
-    mouseover_text = ["Step:{}   Chemistry group:{}   Number batteries:{}   Average:{} Ah +/- {} %".format(*t) for t in metadata]
+    metadata = zip(text_cathodes,
+                   text_counts,
+                   text_steps,
+                   y_mean,
+                   y_percent_error)
+    mouseover_text = ["""Chemistry:{}   \
+                        Batteries:{}   \
+                        Step:{}   \
+                        Average:{} Ah +/- {} %   \
+                        """.format(*t) for t in metadata]
 
     # Assembles data (X and Y data as lists) and layout parameters for Dash
     data=[{"x": x_cycles,
@@ -95,8 +104,8 @@ def update_summary_graph(interval):
                        "array": y_error,
                        "visible": True,},},]
     layout={"height": 500,
-            "xaxis": {"title": "Cycle number"},
-            "yaxis": {"title": "Measured capacity  (mAh)"},}
+            "xaxis": {"title": "Number of discharges"},
+            "yaxis": {"title": "Measured capacity  (Ah)"},}
 
     return Figure(data=data, layout=layout)
 
