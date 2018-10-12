@@ -63,13 +63,14 @@ def make_trace(df, c, colors):
 
     metadata = zip(df_sub["cathode"].tolist(),
                    df_sub["count"].tolist(),
+                   df_sub["cycle"].tolist(),
                    df_sub["step"].tolist(),
                    df_sub["mean"].tolist(),
                    df_sub["error"].tolist(),)
-    mouseover_text = ["""Chemistry:{}   \
-                        Batteries:{}   \
-                        Step:{}   \
-                        Average:{} Ah +- {} %
+    mouseover_text = ["""Chemistry: {}<br>
+                        Batteries: {}<br>
+                        Cycle: {} {}<br>
+                        Average: {:.3f} Ah +- {:.1f} %<br>
                         """.format(*t) for t in metadata]
 
     data_val = go.Scatter(x = x,
@@ -94,7 +95,7 @@ def make_trace(df, c, colors):
               [Input("real_time_updates", "n_intervals")])
 def update_capacity_graph(interval):
     """
-    Queries table, analyzes data, and assembles results in proper Dash format. 
+    Queries table, analyzes data, and assembles results in proper Dash format.
     """
     # Pulls all data from Cassandra into Pandas dataframe
     # TODO: Fix table schema?
