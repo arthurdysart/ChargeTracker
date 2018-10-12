@@ -78,17 +78,17 @@ def make_trace(df, c, colors):
                           hoverinfo = "text",
                           line = {"color": colors[c][0]},
                           mode = "lines+markers",
-                          name = c,
+                          name = "Material {}".format(c),
                           text = mouseover_text,)
 
     data_err = go.Scatter(x = x + x[::-1],
-                          y = y_hi + y_lo,
+                          y = y_hi + y_lo[::-1],
                           fill = "tozerox",
                           fillcolor = colors[c][1],
-                          hoverinfo = "text",
+                          hoverinfo = "none",
                           line = {"color": "rgba(255,255,255,0)"},
                           showlegend = False,
-                          name = c,)
+                          name = "Material {}".format(c),)
     return data_val, data_err
 
 
