@@ -124,8 +124,11 @@ def update_capacity_graph(interval):
     data = list(flat.from_iterable(data))
 
     # Sets layout 
-    layout = go.Layout(paper_bgcolor = "rgb(255,255,255)",
-                       plot_bgcolor = "rgb(229,229,229)",
+    layout = go.Layout(hovermode = "closest",
+                       legend = {'x': 0, 'y': 1},
+                       margin = {'l': 40, 'b': 40, 't': 10, 'r': 10},
+                       #paper_bgcolor = "rgb(255,255,255)",
+                       #plot_bgcolor = "rgb(229,229,229)",
                        xaxis = {"title": "Number of discharges",
                                 "gridcolor": "rgb(255,255,255)",
                                 "showgrid": True,
