@@ -112,6 +112,8 @@ def update_capacity_graph(interval):
                        "count": pg["sum_val"].count(),})
     df["er_pt"] = df["stdev"] * 100.0 / df["mean"]
 
+    print(df)
+
     # Initializes color schemes and gets all cathode names
     colors = {"W": ("rgb(0,100,80)", "rgba(0,100,80,0.1)"),
               "X": ("rgb(0,100,80)", "rgba(0,100,80,0.1)"),
