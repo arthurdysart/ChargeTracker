@@ -67,11 +67,11 @@ def make_trace(df, c, colors):
                    df_sub["step"].tolist(),
                    df_sub["mean"].tolist(),
                    df_sub["error"].tolist(),)
-    mouseover_text = ["""Chemistry: {}<br>
-                        Batteries: {}<br>
-                        Cycle: {} {}<br>
-                        Average: {:.3f} Ah +- {:.1f} %<br>
-                        """.format(*t) for t in metadata]
+    mouseover_text = ["Chemistry: {}<br>"
+                      "Batteries: {}<br>"
+                      "Cycle: {} {}<br>"
+                      "Average: {:.3f} Ah &#177; {:.1f} %"\
+                      .format(*t) for t in metadata]
 
     data_val = go.Scatter(x = x,
                           y = y,
