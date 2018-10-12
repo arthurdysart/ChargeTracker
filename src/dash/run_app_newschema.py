@@ -110,9 +110,7 @@ def update_capacity_graph(interval):
     df = pd.DataFrame({"mean": pg["sum_val"].mean(),
                        "stdev": pg["sum_val"].std(),
                        "count": pg["sum_val"].count(),}).reset_index()
-    df["er_pt"] = df["stdev"] * 100.0 / df["mean"]
-
-    print(df.columns.values)
+    df["error"] = df["stdev"] * 100.0 / df["mean"]
 
     # Initializes color schemes and gets all cathode names
     colors = {"W": ("rgb(0,100,80)", "rgba(0,100,80,0.1)"),
