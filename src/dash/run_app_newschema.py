@@ -128,7 +128,6 @@ def update_capacity_graph(interval):
                        plot_bgcolor = "rgb(229,229,229)",
                        xaxis = {"title": "Number of discharges",
                                 "gridcolor": "rgb(255,255,255)",
-                                "range": [1,10],
                                 "showgrid": True,
                                 "showline": False,
                                 "showticklabels": True,
