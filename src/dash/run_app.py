@@ -43,9 +43,7 @@ def query_cassandra(query):
     """
     Queries Cassandra database according to input CQL statement.
     """
-    output = cass_db.execute(query, timeout=None)
-    results = output._current_rows
-    return results
+    return cass_db.execute(query, timeout=None)._current_rows
 
 # Callback updates graph (OUTPUT) according to time interval (INPUT)
 @app.callback(Output('capacity_tracker','figure'),
