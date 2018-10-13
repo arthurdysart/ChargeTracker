@@ -3,25 +3,27 @@ ChargeTracker: Near real-time analysis of rechargeable battery systems
 
 ## Cluster setup
 
-Create new VPC with associated subnet. Create new security group for ChargeTracker. Create new EC2 instance as control node.
+Create new VPC with associated subnet.
+Create new security group for ChargeTracker.
+Create new EC2 instance as control node.
 
 From local machine, upload PEM keypair to control node:
 ```
-scp -i ~/.ssh/arthurdysart-IAM-keypair.pem ~/Desktop/insight/arthurdysart-IAM-keypair.pem ec2-user@18.232.91.146:/home/ec2-user/.ssh/
+scp -i <path-to-keypair> <path-to-copy-keypair> ec2-user@<IP-control-node>:/home/ec2-user/.ssh/
 ```
 
-Update packages and dependencies on control node:
+Clones ChargeTracker and installs dependencies onto control node:
 ```
 # Updates all packages on EC2 AMI 1 instance
 sudo yum update
-# Lists available packages that have python3 in their name
-yum list | grep python3
-# Installs git, python 3.6, pip 3.6, and all optional packages
+# Installs all dependencies and packages
 sudo yum install git tmux python36 python36-debug python36-devel python36-libs python36-pip python36-setuptools python36-test python36-tools python36-virtualenv python-pip
-# Updates pip
-sudo pip-3.6 install --upgrade pip
-# Install Python-Kafka library and Cassandra-driver (INSTALL ON KAFKA, SPARK, AND DATABASE MASTER NODES)
-sudo pip install python-decouple confluent-kafka pykafka kafka-python cassandra-driver dash==0.28.2 dash-html-components==0.13.2 dash-core-components==0.30.2
+# Craetes "ChargeTracker" directory
+mkdir ~/charge_tracker
+# Clones "ChargeTracker" git repository
+git clone https://github.com/arthurdysart/ChargeTracker.git ~/charge_tracker
+# Installs python requirements
+sudo pip install -r ~/charge_tracker/util/settings/python_requirements.txt
 ```
 
 Install [Insight Pegasus](https://github.com/InsightDataScience/pegasus) service:
