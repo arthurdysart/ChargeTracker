@@ -42,7 +42,7 @@ Raw measurements Per-second Apache Kafka constitues an organized
 
 
 ## Install ChargeTracker
-ChargeTracker is executed on a multi-node cluster using AWS EC2 instances. Deployment via Pegasus (Insight Data Science) is recommended and outlined in project documentation `\doc\README.md`.
+ChargeTracker is executed on a multi-node cluster using AWS EC2 instances. Deployment via Insight Pegasus is recommended and outlined below. Detailed instructions are available in project documentation `\doc\README.md`.
 
 From the Cassandra node, initiate the Cassandra service (stores calculated metrics):
 ```
@@ -105,12 +105,12 @@ From the generator node, initiate the Tmux producer service (publishes raw measu
 CHARGE_TRACKER_HOME=~/charge_tracker
 # Starts Tmux producer service with 100 producers (100 cycles, 1200 mA current, voltage range 2.0 - 4.5 V)
 GENERATOR_START=$CHARGE_TRACKER_HOME/src/tmux/multiple_batteries.sh
-bash $GENERATOR_START generate_batteries 100 100 1200 2.0 4.5T
+bash $GENERATOR_START generate_batteries 100 100 1200 2.0 4.5
 ```
 
 View real time battery data using Dash GUI dashboard:
 ```
-http://mybatteries.live
+xdg-open http://mybatteries.live
 ```
 
 ## Credits
