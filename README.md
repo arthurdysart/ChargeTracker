@@ -5,10 +5,10 @@ ChargeTracker: Near real-time analysis of rechargeable battery systems
 ChargeTracker monitors battery systems containing over 100 independent battery cells. Every 30 seconds, each battery's performance metrics (e.g., total energy and capacity) are calculated from raw sensor measurements (voltage, current, and time). Through its GUI dashboard, ChargeTracker aggreagates these metrics by metadata to enable: (1) comparision across battery groups, and (2) identification of inaccurate outliers.
 
 ## Navigation
-1. [ABOUT](README.md#About)
-2. [DESIGN](README.md#Engineering-Design)
-3. [INSTALL](README.md#Install)
-4. [CREDITS](README.md#Credits)
+1. [ABOUT](#about)
+2. [DESIGN](#engineering-design)
+3. [QUICK START](#quick-start)
+4. [CREDITS](#credits)
 5. [DEMO](http://mybatteries.live)
 
 ## About
@@ -41,8 +41,8 @@ Raw measurements Per-second Apache Kafka constitues an organized
 **TODO:SHORT PEGASUS DESCRIPTION**
 
 
-## Install
-ChargeTracker is executed on a multi-node cluster using AWS EC2 instances. Deployment via [Insight Pegasus](https://github.com/InsightDataScience/pegasus) is recommended. Detailed instructions are available in [project documentation](doc/manual_install.md) `doc/manual_install.md`. 
+## Quick Start
+ChargeTracker is executed on a multi-node cluster using AWS EC2 instances. Deployment via [Insight Pegasus](https://github.com/InsightDataScience/pegasus) is recommended. Detailed instructions are available in [project documentation](doc/manual_install.md). 
 
 From control node, initiate all cluster services using [Insight Pegasus](https://github.com/InsightDataScience/pegasus):
 ```
@@ -71,4 +71,4 @@ python -m webbrowser http://mybatteries.live
 
 
 ## Credits
-ChargeTracker was developed by Arthur Dysart, inspired by automation needs in the battery research community. This project was created as part of the 2018 Insight Data Engineering Fellowship program.
+ChargeTracker was developed by Arthur Dysart, inspired by automation needs in the battery research community. This project was created as part of the [2018 Insight Data Engineering Fellowship](https://www.insightdataengineering.com/) program.
