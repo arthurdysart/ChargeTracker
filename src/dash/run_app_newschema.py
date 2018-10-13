@@ -34,10 +34,22 @@ app.layout = html.Div([html.Div([dcc.Graph(id="capacity_tracker",
                                        "display": "scatter"}),
                                 dcc.Interval(id="real_time_updates",
                                              interval=10000,
-                                             n_intervals=0),],
-                        style={"width": "90%",
+                                             n_intervals=0),
+
+                       html.Div([generate_table(),],
+                                style={"width": "100%",
+                                       "height": "auto",
+                                       "display": "scatter"}),],
+                       style={"width": "90%",
                                "display": "scatter"})
 
+app.layout = html.Div(children=[,
+    generate_table(df)
+])
+
+
+
+    
 ## FUNCTION DEFINITIONS
 def create_dataframe(colnames, rows):
     """
@@ -50,6 +62,30 @@ def query_cassandra(query):
     Queries Cassandra database according to input CQL statement.
     """
     return cass_db.execute(query, timeout=None)._current_rows
+
+def query_analyze_cassandra():
+    """
+    Aggregates queried Cassandra data by mean, std dev, counts, and error.
+    """
+    # Pulls all data from Cassandra into Pandas dataframe
+    # TODO: Fix table schema?
+    df_all = query_cassandra("""
+                             SELECT step, id, cathode, cycle,
+                             double_sum(capacity) AS sum_val
+                             FROM battery_data WHERE step = 'D'
+                             ALLOW FILTERING;
+                             """)
+
+    # Calculates aggreates (mean, std dev, count, error, upper/lower limits)
+    pg = df_all.groupby(["cathode", "cycle", "step"])
+    df = pd.DataFrame({"id": pg["id"],
+                       "mean": pg["sum_val"].mean(),
+                       "stdev": pg["sum_val"].std(),
+                       "count": pg["sum_val"].count(),}).reset_index()
+    df["error"] = df["stdev"] * 100.0 / df["mean"]
+
+    return df
+
 
 def make_trace(df, c, colors):
     """
@@ -89,6 +125,7 @@ def make_trace(df, c, colors):
                           line = {"color": "rgba(255,255,255,0)"},
                           showlegend = False,
                           name = "Material {}".format(c),)
+
     return data_val, data_err
 
 
@@ -97,23 +134,9 @@ def make_trace(df, c, colors):
               [Input("real_time_updates", "n_intervals")])
 def update_capacity_graph(interval):
     """
-    Queries table, analyzes data, and assembles results in proper Dash format.
+    Queries table, analyzes data, and assembles results in Dash format.
     """
-    # Pulls all data from Cassandra into Pandas dataframe
-    # TODO: Fix table schema?
-    df_all = query_cassandra("""
-                             SELECT step, id, cathode, cycle,
-                             double_sum(capacity) AS sum_val
-                             FROM battery_data WHERE step = 'D'
-                             ALLOW FILTERING;
-                             """)
-
-    # Calculates aggreates (mean, std dev, count, error, upper/lower limits)
-    pg = df_all.groupby(["cathode", "cycle", "step"])
-    df = pd.DataFrame({"mean": pg["sum_val"].mean(),
-                       "stdev": pg["sum_val"].std(),
-                       "count": pg["sum_val"].count(),}).reset_index()
-    df["error"] = df["stdev"] * 100.0 / df["mean"]
+    df = query_analyze_cassandra()
 
     # Initializes color schemes and gets all cathode names
     colors = {"W": ("rgb(0,100,80)", "rgba(0,100,80,0.1)"),
@@ -150,6 +173,19 @@ def update_capacity_graph(interval):
                                 "zeroline": False},)
 
     return go.Figure(data = data, layout = layout)
+
+
+def generate_table(max_rows=15):
+    """
+    Creates HTML table sorted by decreasing std dev.
+    """
+    df = query_analyze_cassandra()
+    
+    row_header = [html.Tr([html.Th(c) for c in df.columns])]
+    row_data = [html.Tr([html.Td(df.iloc[i][c]) for c in df.columns]) for i in range(min(len(df), max_rows))]
+
+    return html.Table(row_header + row_data)
+
 
 
 ## MAIN MODULE
