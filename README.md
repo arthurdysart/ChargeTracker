@@ -42,20 +42,26 @@ Raw measurements Per-second Apache Kafka constitues an organized
 
 
 ## Install
-ChargeTracker is executed on a multi-node cluster using AWS EC2 instances. Deployment via [Insight Pegasus](https://github.com/InsightDataScience/pegasus) is recommended and outlined below. Detailed instructions are available in project documentation `\doc\manual_install.md`.
+ChargeTracker is executed on a multi-node cluster using AWS EC2 instances. Deployment via [Insight Pegasus](https://github.com/InsightDataScience/pegasus) is recommended. Detailed instructions are available in [project documentation](doc/manual_install.md) `doc/manual_install.md`. 
 
 From control node, initiate all cluster services using [Insight Pegasus](https://github.com/InsightDataScience/pegasus):
 ```
+CHARGE_TRACKER_HOME=~/charge_tracker
 # Starts Cassandra service
-peg sshcmd-cluster <cassandra-cluster-alias> "sudo bash $CHARGE_TRACKER_HOME/src/cassandra/start_service.sh"
+peg fetch <cassandra-cluster-alias>
+peg sshcmd-node <cassandra-cluster-alias> 1 "sudo bash $CHARGE_TRACKER_HOME/src/cassandra/start_service.sh"
 # Starts Kafka service
-peg sshcmd-cluster <kafka-cluster-alias> "sudo bash $CHARGE_TRACKER_HOME/src/kafka/start_service.sh"
+peg fetch <kafka-cluster-alias>
+peg sshcmd-node <kafka-cluster-alias> 1 "sudo bash $CHARGE_TRACKER_HOME/src/kafka/start_service.sh"
 # Starts Spark service
-peg sshcmd-cluster <spark-cluster-alias> "sudo bash $CHARGE_TRACKER_HOME/src/spark/start_service.sh"
+peg fetch <spark-cluster-alias>
+peg sshcmd-node <spark-cluster-alias> 1 "sudo bash $CHARGE_TRACKER_HOME/src/spark/start_service.sh"
 # Starts Dash service
-peg sshcmd-cluster <dash-cluster-alias> "sudo bash $CHARGE_TRACKER_HOME/src/dash/start_service.sh"
+peg fetch <dash-cluster-alias>
+peg sshcmd-node <dash-cluster-alias> 1 "sudo bash $CHARGE_TRACKER_HOME/src/dash/start_service.sh"
 # Starts Tmux multi-producer service
-peg sshcmd-cluster <tmux-cluster-alias> "sudo bash $CHARGE_TRACKER_HOME/src/tmux/start_service.sh"
+peg fetch <tmux-cluster-alias>
+peg sshcmd-node <tmux-cluster-alias> 1 "sudo bash $CHARGE_TRACKER_HOME/src/tmux/start_service.sh"
 ```
 
 From local computer, open the live GUI dashboard:
