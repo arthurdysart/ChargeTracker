@@ -56,12 +56,9 @@ def reset_keyspace(keyspace_name, db_cass):
                     DROP KEYSPACE IF EXISTS {};
                     """.format(keyspace_name))
 
-    db_cass.execute(r"""
-                    CREATE KEYSPACE IF NOT EXISTS {}
-                    WITH replication =
-                    {'class': 'SimpleStrategy',
-                    'replication_factor' : 3};
-                    """.format(keyspace_name))
+    cql_keyspace = "CREATE KEYSPACE IF NOT EXISTS {} ".format(keyspace_name) + \
+        "WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 3};"
+    db_cass.execute(cql_keyspace)
 
     # Creates CQL command for double and integer summation
     db_cass.execute("""
