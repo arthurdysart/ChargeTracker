@@ -90,26 +90,28 @@ def reset_keyspace(keyspace_name, db_cass):
                        { sum += i; }
                        return sum;';
                        """)
-    return None
+    return db_session
 
-def reset_table(table_name, db_cass):
+def reset_table(table_name, db_cass, keyspace_name="battery_metrics"):
     """
     Creates and executes CQL commands to drop and re-create Cassandra tables.
     """
-    print("Respawning table {} ...".format(table_name))
+    print("Respawning table {}.{} ...".format(keyspace_name, table_name))
 
-    db_cass.execute("""
-                    DROP TABLE IF EXISTS {};
-                    """.format(table_name))
+    db_session.execute("""
+                       DROP TABLE IF EXISTS {}.{};
+                       """.format(keyspace_name, table_name))
 
-    db_cass.execute("""
-                    CREATE TABLE IF NOT EXISTS {} (
-                    cathode text,
-                    cycle int,
-                    id int,
-                    value list<double>,
-                    PRIMARY KEY((cathode, cycle)));
-                    """.format(table_name))
+    db_session.execute("""
+                       CREATE TABLE IF NOT EXISTS {}.{} (
+                       """.format(keyspace_name, table_name) + \
+                       """
+                       cathode text,
+                       cycle int,
+                       id int,
+                       value list<double>,
+                       PRIMARY KEY((cathode, cycle)));
+                       """)
     return 1
 
 
@@ -120,10 +122,10 @@ if __name__ == "__main__":
     db_cass = cassc.Cluster(p["cassandra"])
 
     # Creates and executes all CQL commands for keyspace reset
-    reset_keyspace("battery_metrics", db_cass)
+    db_session = reset_keyspace("battery_metrics", db_cass)
 
     # Creates and executes all CQL commands for table reset
-    count = sum(reset_table(name, db_cass) for name in table_names)
+    count = sum(reset_table(name, db_session) for name in table_names)
 
     # Ends CQL session and displays completion statement to standard output
     db_cass.shutdown()
