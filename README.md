@@ -1,8 +1,7 @@
-**TODO: ADD LOGO**
+![Charge Tracker: Near real-time analysis of rechargeable battery systems](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/logo.png)
+Charge Tracker: Near real-time analysis of rechargeable battery systems
 
-ChargeTracker: Near real-time analysis of rechargeable battery systems
-
-ChargeTracker monitors battery systems containing over 100 independent battery cells. Every 30 seconds, each battery's performance metrics are calculated from raw sensor measurements. Through its GUI dashboard, ChargeTracker aggreagates these metrics by meaningful metadata to enable: (1) comparision across battery groups, and (2) identification of inaccurate outliers.
+ChargeTracker monitors battery systems containing over 100 independent battery cells. Every 30 seconds, each battery's performance metrics are calculated from raw sensor measurements. Through its GUI dashboard, ChargeTracker aggreagates these metrics into groups to enable: (1) comparision across meaningful groups, and (2) identification of inaccurate outliers.
 
 ## Navigation
 1. [ABOUT](#about)
@@ -16,7 +15,7 @@ ChargeTracker addresses the battery community's need for automated electrochemic
 
 ChargeTracker's MapReduce tasks transform raw sensor measurements (i.e., voltage, current, and time) into meaningful battery metrics (total energy and capacity). Analyzed battery data is grouped according to specified metadata (e.g., cathode material W, X, Y, or Z) and displayed on the [live GUI dashboard](http://mybatteries.live), refreshed every 30 seconds:
 
-**TODO: SHOW DASHBOARD IN ACTION**
+**TODO: SHOW GRAPH IN ACTION**
 
 Below the dashboard, constituent batteries for each group are tabulated and ordered by standard deviation. Outliers are identified by excessive standard deviation from the mean performance value:
 
@@ -27,7 +26,7 @@ ChargeTracker version 1.0 is built on Python 2.7 and processes ca. 2,500 message
 ## Engineering Design
 ChargeTracker is a streaming analysis pipeline built on 5 open-source technologies:
 
-**TODO: SHOW TABLE IN ACTION**
+![ChargeTracker shows near real-time metrics derived from raw sensor measurements](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/pipeline.png)
 
 Each tracked battery publishes raw measurements to the [Apache Kafka] service (into 1 kafka topic, 3 partitions). These raw measurements are consumed by the [Spark Streaming](https://spark.apache.org/streaming/) service and transformed into meaningful metrics via RDD MapReduce tasks. Analyzed results are stored and organized in the [Apache Cassandra](http://cassandra.apache.org/) database service according to partition keys `chemistry` and `test_type` and clustering key `cycle: decending`. The [Dash](https://dash.plot.ly/introduction) service queries the database and refreshes the interactive GUI dashboard every 30 seconds. To optimize throughput, cluster nodes are allocated to services as follows:
 
@@ -41,7 +40,7 @@ Each tracked battery publishes raw measurements to the [Apache Kafka] service (i
 
 The Spark Streaming service executes MapReduce tasks across 3 worker nodes. To optimize data input, the Kafka service's topic is organized into 6 partitions: 2 partitions are fed into each Spark Streaming worker node. The Cassandra service is distributed across an odd number of nodes to enable majority voting, in the case of network downtime, as part of the gossip protcol:
 
-**TODO: SHOW TASK PARALLELIZATION**
+![Node distribution is optimized for parallel tasks](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/cluster_design.png)
 
 ## Quick Start
 ChargeTracker is executed on a multi-node cluster. Deployment via [Insight Pegasus](https://github.com/InsightDataScience/pegasus) on [AWS Cloud EC2](https://aws.amazon.com/ec2/) is recommended. The project documentation includes detailed instructions for [cluster setup](doc/cluster_setup.md) and [manual installation](doc/manual_install.md).
