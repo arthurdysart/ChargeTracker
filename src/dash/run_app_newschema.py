@@ -43,12 +43,6 @@ app.layout = html.Div([html.Div([dcc.Graph(id="capacity_tracker",
                        style={"width": "90%",
                                "display": "scatter"})
 
-app.layout = html.Div(children=[,
-    generate_table(df)
-])
-
-
-
     
 ## FUNCTION DEFINITIONS
 def create_dataframe(colnames, rows):
@@ -63,7 +57,7 @@ def query_cassandra(query):
     """
     return cass_db.execute(query, timeout=None)._current_rows
 
-def query_analyze_cassandra():
+def analyze_all_groups():
     """
     Aggregates queried Cassandra data by mean, std dev, counts, and error.
     """
@@ -78,14 +72,12 @@ def query_analyze_cassandra():
 
     # Calculates aggreates (mean, std dev, count, error, upper/lower limits)
     pg = df_all.groupby(["cathode", "cycle", "step"])
-    df = pd.DataFrame({"id": pg["id"],
-                       "mean": pg["sum_val"].mean(),
+    df = pd.DataFrame({"mean": pg["sum_val"].mean(),
                        "stdev": pg["sum_val"].std(),
                        "count": pg["sum_val"].count(),}).reset_index()
     df["error"] = df["stdev"] * 100.0 / df["mean"]
 
     return df
-
 
 def make_trace(df, c, colors):
     """
@@ -103,10 +95,10 @@ def make_trace(df, c, colors):
                    df_sub["step"].tolist(),
                    df_sub["mean"].tolist(),
                    df_sub["error"].tolist(),)
-    mouseover_text = ["Chemistry: {}<br>"
+    mouseover_text = ["Average: {:.3f} Ah &#177; {:.1f} %"
+                      "Chemistry: {}<br>"
                       "Batteries: {}<br>"
-                      "Cycle: {} {}<br>"
-                      "Average: {:.3f} Ah &#177; {:.1f} %"\
+                      "Cycle: {} {}<br>"\
                       .format(*t) for t in metadata]
 
     data_val = go.Scatter(x = x,
@@ -136,7 +128,7 @@ def update_capacity_graph(interval):
     """
     Queries table, analyzes data, and assembles results in Dash format.
     """
-    df = query_analyze_cassandra()
+    df = analyze_all_groups()
 
     # Initializes color schemes and gets all cathode names
     colors = {"W": ("rgb(0,100,80)", "rgba(0,100,80,0.1)"),
@@ -174,6 +166,72 @@ def update_capacity_graph(interval):
 
     return go.Figure(data = data, layout = layout)
 
+def analyze_one_group():
+    """
+    Aggregates battery data for selected battery group.
+    """
+    # Pulls all data from Cassandra into Pandas dataframe
+    # TODO: Fix table schema?
+    df_all = query_cassandra("""
+                             SELECT step, id, cathode, cycle,
+                             double_sum(capacity) AS sum_val
+                             FROM battery_data WHERE step = 'D'
+                             ALLOW FILTERING;
+                             """)
+
+    # Calculates aggreates (mean, std dev, count, error, upper/lower limits)
+    pg = df_all.groupby(["cathode", "cycle", "step"])
+    df = pd.DataFrame({"mean": pg["sum_val"].mean(),
+                       "stdev": pg["sum_val"].std(),
+                       "count": pg["sum_val"].count(),}).reset_index()
+    df["error"] = df["stdev"] * 100.0 / df["mean"]
+
+    return df
+
+# Callback updates graph (OUTPUT) according to time interval (INPUT)
+#@app.callback(Output("capacity_tracker", "figure"),
+#              [Input("real_time_updates", "n_intervals")])
+def update_battery_table(interval):
+    """
+    Queries table, analyzes data, and assembles results in Dash format.
+    """
+    df = analyze_one_group()
+
+    # Initializes color schemes and gets all cathode names
+    colors = {"W": ("rgb(0,100,80)", "rgba(0,100,80,0.1)"),
+              "X": ("rgb(0,100,80)", "rgba(0,100,80,0.1)"),
+              "Y": ("rgb(0,176,246)", "rgba(0,176,246,0.2)"),
+              "Z": ("rgb(231,107,243)", "rgba(231,107,243,0.2)"),}
+    cathodes = df.cathode.unique()
+
+    # Creates all scatter data for real-time graph
+    data = [make_trace(df, c, colors) for c in cathodes]
+    data = list(flat.from_iterable(data))
+
+    # Sets layout 
+    layout = go.Layout(hovermode = "closest",
+                       legend = {'x': 0, 'y': 1},
+                       margin = {'l': 40, 'b': 40, 't': 10, 'r': 10},
+                       #paper_bgcolor = "rgb(255,255,255)",
+                       #plot_bgcolor = "rgb(229,229,229)",
+                       xaxis = {"title": "Number of discharges",
+                                "gridcolor": "rgb(255,255,255)",
+                                "showgrid": True,
+                                "showline": False,
+                                "showticklabels": True,
+                                "tickcolor": "rgb(127,127,127)",
+                                "ticks": "outside",
+                                "zeroline": False},
+                       yaxis = {"title": "Measured capacity  (Ah)",
+                                "gridcolor": "rgb(255,255,255)",
+                                "showgrid": True,
+                                "showline": False,
+                                "showticklabels": True,
+                                "tickcolor": "rgb(127,127,127)",
+                                "ticks": "outside",
+                                "zeroline": False},)
+
+    return go.Figure(data = data, layout = layout)
 
 def generate_table(max_rows=15):
     """

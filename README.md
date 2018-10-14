@@ -63,7 +63,7 @@ sudo git clone https://github.com/arthurdysart/ChargeTracker.git ~/charge_tracke
 peg fetch $CASSANDRA_CLUSTER
 peg install $CASSANDRA_CLUSTER cassandra
 peg service $CASSANDRA_CLUSTER cassandra start
-peg sshcmd-cluster $CASSANDRA_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git ~/charge_tracker"
+peg sshcmd-cluster $CASSANDRA_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git $CHARGE_TRACKER_HOME"
 peg sshcmd-node $CASSANDRA_CLUSTER 1 "sudo bash $CHARGE_TRACKER_HOME/src/cassandra/run_service.sh"
 
 # Starts Kafka and Zookeeper services
@@ -72,7 +72,7 @@ peg install $KAFKA_CLUSTER zookeeper
 peg service $KAFKA_CLUSTER zookeeper start
 peg install $KAFKA_CLUSTER kafka
 peg service $KAFKA_CLUSTER kafka start
-peg sshcmd-cluster $KAFKA_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git ~/charge_tracker"
+peg sshcmd-cluster $KAFKA_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git $CHARGE_TRACKER_HOME"
 peg sshcmd-node $KAFKA_CLUSTER 1 "sudo bash $CHARGE_TRACKER_HOME/src/kafka/run_service.sh"
 
 # Starts Spark and Hadoop services
@@ -81,17 +81,17 @@ peg install $SPARK_CLUSTER hadoop
 peg service $SPARK_CLUSTER hadoop start
 peg install $SPARK_CLUSTER spark
 peg service $SPARK_CLUSTER spark start
-peg sshcmd-cluster $SPARK_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git ~/charge_tracker"
+peg sshcmd-cluster $SPARK_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git $CHARGE_TRACKER_HOME"
 peg sshcmd-node $SPARK_CLUSTER 1 "sudo bash $CHARGE_TRACKER_HOME/src/spark/run_service.sh"
 
 # Starts Dash service
 peg fetch $DASH_CLUSTER
-peg sshcmd-cluster $DASH_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git ~/charge_tracker"
+peg sshcmd-cluster $DASH_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git $CHARGE_TRACKER_HOME"
 peg sshcmd-node $DASH_CLUSTER 1 "sudo bash $CHARGE_TRACKER_HOME/src/dash/run_service.sh"
 
 # Starts Tmux multi-producer service
 peg fetch $TMUX_CLUSTER
-peg sshcmd-cluster $TMUX_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git ~/charge_tracker"
+peg sshcmd-cluster $TMUX_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git $CHARGE_TRACKER_HOME"
 peg sshcmd-node $TMUX_CLUSTER 1 "sudo bash $CHARGE_TRACKER_HOME/src/tmux/run_service.sh"
 ```
 
