@@ -44,7 +44,7 @@ def setup_connection(p):
     """
     Initializes Cassandra CQL session and batch CQL statement executor.
     """
-    db_cass = cassc.Cluster(p["cassandra"])
+    db_cass = cassc.Cluster(p["cassandra"]).connect()
     return db_cass
 
 def reset_keyspace(keyspace_name, db_cass):
