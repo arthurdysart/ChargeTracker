@@ -56,7 +56,7 @@ def reset_keyspace(keyspace_name, db_cass):
                     DROP KEYSPACE IF EXISTS {};
                     """.format(keyspace_name))
 
-    db_cass.execute("""
+    db_cass.execute(r"""
                     CREATE KEYSPACE IF NOT EXISTS {}
                     WITH replication =
                     {'class': 'SimpleStrategy',
