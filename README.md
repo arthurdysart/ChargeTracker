@@ -33,7 +33,7 @@ Each battery publishes its raw measurements to [Kafka](https://kafka.apache.org/
 
 | Technology             | Nodes | Purpose                                                                          |
 |------------------------|-------|----------------------------------------------------------------------------------|
-| Apache Kafka           |   4   | Ingests raw measurements into 1 Kafka topic across 3 partitions (4 brokers)      |
+| Apache Kafka           |   4   | Ingests raw measurements into 1 Kafka topic across 6 partitions (4 brokers)      |
 | Apache Spark Streaming |   4   | Transforms raw measurements into battery metrics (1 driver, 3 workers)           |
 | Apache Cassandra       |   3   | Partitions analyzed metrics by battery group, clusters by number of (dis)charges |
 | Plotly Dash            |   1   | Displays aggregate battery metrics in near real-time GUI                         |
