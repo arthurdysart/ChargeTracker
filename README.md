@@ -1,8 +1,8 @@
-![Charge Tracker: Near real-time analysis of rechargeable battery systems](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/logo.png)
+![ChargeTracker: Near real-time analysis of rechargeable battery systems](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/logo.png)
 
-Charge Tracker: Near real-time analysis of rechargeable battery systems
+ChargeTracker: Near real-time analysis of rechargeable battery systems
 
-ChargeTracker monitors battery systems containing over 100 independent battery cells. Every 30 seconds, each battery's performance metrics are calculated from raw sensor measurements. Through its GUI dashboard, ChargeTracker aggreagates these metrics into groups to enable: (1) comparision across meaningful groups, and (2) identification of inaccurate outliers.
+ChargeTracker monitors battery systems containing over 100 independent battery cells. Every 30 seconds, performance metrics are calculated from raw sensor measurements for all batteries. Through its GUI dashboard, ChargeTracker aggreagates these metrics into groups to enable: (1) comparision across meaningful groups, and (2) identification of inaccurate outliers.
 
 ## Navigation
 1. [ABOUT](#about)
@@ -12,9 +12,9 @@ ChargeTracker monitors battery systems containing over 100 independent battery c
 5. [DEMO](http://mybatteries.live)
 
 ## About
-ChargeTracker addresses the battery community's need for automated electrochemical analysis and monitoring. Today, battery analysis is inefficient and tedious: raw sensor measurements are retrieved by physical download onto flashdrives, then analyzed using commercial spreadsheet software. ChargeTracker automates this procedure across multiple batteries, permitting battery technicians, engineers, and researchers to focus on more significant tasks and company activities. In this context, ChargeTracker is designed to accelerate team producivitity, technologic progress, and scientific discovery.
+ChargeTracker addresses the battery community's need for automated electrochemical analysis and real-time monitoring. Today, battery analysis is inefficient and tedious: raw sensor measurements must be physically downloaded onto flashdrives, then analyzed with commercial spreadsheet software. ChargeTracker automates this procedure for all tracked batteries, permitting technicians, engineers, and researchers to focus on more significant tasks and worthwhile pursuits. In this context, ChargeTracker is designed to accelerate team producivitity, technologic progress, and scientific discovery.
 
-ChargeTracker's MapReduce tasks transform raw sensor measurements (i.e., voltage, current, and time) into meaningful battery metrics (total energy and capacity). Analyzed battery data is grouped according to specified metadata (e.g., cathode material W, X, Y, or Z) and displayed on the [live GUI dashboard](http://mybatteries.live), refreshed every 30 seconds:
+ChargeTracker's MapReduce tasks transform raw sensor measurements (i.e., voltage, current, and time) into meaningful battery metrics (total energy and capacity). Analyzed battery data is grouped according to specified metadata (e.g., cathode material X, Y, or Z) and displayed on the [live GUI dashboard](http://mybatteries.live), refreshed every 30 seconds:
 
 **TODO: SHOW GRAPH IN ACTION**
 

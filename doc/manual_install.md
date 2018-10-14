@@ -1,4 +1,5 @@
-**TODO: ADD LOGO**
+![ChargeTracker: Near real-time analysis of rechargeable battery systems](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/logo.png)
+
 ChargeTracker: Near real-time analysis of rechargeable battery systems
 
 ## Manual Install
