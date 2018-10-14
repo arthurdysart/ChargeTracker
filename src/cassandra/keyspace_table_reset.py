@@ -44,45 +44,52 @@ def setup_connection(p):
     """
     Initializes Cassandra CQL session and batch CQL statement executor.
     """
-    db_cass = cassc.Cluster(p["cassandra"]).connect()
-    return db_cass
+    return 
 
 def reset_keyspace(keyspace_name, db_cass):
     """
     Creates and executes CQL commands for Cassandra keyspace and UDFs.
     """
-    # Initialzes keyspace
-    db_cass.execute("""
-                    DROP KEYSPACE IF EXISTS {};
-                    """.format(keyspace_name))
+    db_session = db_cass.connect()
 
-    cql_keyspace = "CREATE KEYSPACE IF NOT EXISTS {} ".format(keyspace_name) + \
-        "WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 3};"
-    db_cass.execute(cql_keyspace)
-    db_cass.connect(keyspace_name)
+    # Initialzes keyspace
+    db_session.execute("""
+                       DROP KEYSPACE IF EXISTS {};
+                       """.format(keyspace_name))
+    db_session.execute("""
+                       CREATE KEYSPACE IF NOT EXISTS {}
+                       """.format(keyspace_name) + \
+                       """
+                       WITH replication =
+                       {'class': 'SimpleStrategy', 'replication_factor' : 3};
+                       """)
 
     # Creates CQL command for double and integer summation
-    db_cass.execute("""
-                    CREATE OR REPLACE FUNCTION
-                    double_sum (collection list<double>)
-                    CALLED ON NULL INPUT RETURNS double
-                    LANGUAGE java AS
-                    'double sum = 0;
-                    for (double i: collection)
-                    { sum += i; }
-                    return sum;';
-                    """)
+    db_session.execute("""
+                       CREATE OR REPLACE FUNCTION {}
+                       """.format(keyspace_name) + \
+                       """
+                       .double_sum (collection list<double>)
+                       CALLED ON NULL INPUT RETURNS double
+                       LANGUAGE java AS
+                       'double sum = 0;
+                       for (double i: collection)
+                       { sum += i; }
+                       return sum;';
+                       """)
 
-    db_cass.execute("""
-                    CREATE OR REPLACE FUNCTION
-                    int_sum (collection list<int>)
-                    CALLED ON NULL INPUT RETURNS int
-                    LANGUAGE java AS
-                    'int sum = 0;
-                    for (int i: collection)
-                    { sum += i; }
-                    return sum;';
-                    """)
+    db_session.execute("""
+                       CREATE OR REPLACE FUNCTION {}
+                       """.format(keyspace_name) + \
+                       """
+                       .int_sum (collection list<int>)
+                       CALLED ON NULL INPUT RETURNS int
+                       LANGUAGE java AS
+                       'int sum = 0;
+                       for (int i: collection)
+                       { sum += i; }
+                       return sum;';
+                       """)
     return None
 
 def reset_table(table_name, db_cass):
@@ -110,7 +117,7 @@ def reset_table(table_name, db_cass):
 if __name__ == "__main__":
     # Imports standard input and sets Cassandra connection
     table_names, p = stdin(sys.argv)
-    db_cass = setup_connection(p)
+    db_cass = cassc.Cluster(p["cassandra"])
 
     # Creates and executes all CQL commands for keyspace reset
     reset_keyspace("battery_metrics", db_cass)
