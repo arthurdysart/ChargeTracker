@@ -44,7 +44,7 @@ The Spark Streaming service executes MapReduce tasks across 3 worker nodes. To o
 **TODO: SHOW TASK PARALLELIZATION**
 
 ## Quick Start
-ChargeTracker is executed on a multi-node cluster. Deployment via [Insight Pegasus](https://github.com/InsightDataScience/pegasus) on [AWS Cloud EC2](https://aws.amazon.com/ec2/) is recommended. The [project documentation](doc/) includes detailed instructions for cluster setup and manual installation.
+ChargeTracker is executed on a multi-node cluster. Deployment via [Insight Pegasus](https://github.com/InsightDataScience/pegasus) on [AWS Cloud EC2](https://aws.amazon.com/ec2/) is recommended. The project documentation includes detailed instructions for [cluster setup](doc/cluster_setup.md) and [manual installation](doc/manual_install.md).
 
 From control node, initiate all cluster services using [Insight Pegasus](https://github.com/InsightDataScience/pegasus):
 ```
