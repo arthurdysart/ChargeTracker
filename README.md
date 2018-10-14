@@ -1,4 +1,5 @@
 ![Charge Tracker: Near real-time analysis of rechargeable battery systems](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/logo.png)
+
 Charge Tracker: Near real-time analysis of rechargeable battery systems
 
 ChargeTracker monitors battery systems containing over 100 independent battery cells. Every 30 seconds, each battery's performance metrics are calculated from raw sensor measurements. Through its GUI dashboard, ChargeTracker aggreagates these metrics into groups to enable: (1) comparision across meaningful groups, and (2) identification of inaccurate outliers.
@@ -28,7 +29,7 @@ ChargeTracker is a streaming analysis pipeline built on 5 open-source technologi
 
 ![ChargeTracker shows near real-time metrics derived from raw sensor measurements](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/pipeline.png)
 
-Each tracked battery publishes raw measurements to the [Apache Kafka] service (into 1 kafka topic, 3 partitions). These raw measurements are consumed by the [Spark Streaming](https://spark.apache.org/streaming/) service and transformed into meaningful metrics via RDD MapReduce tasks. Analyzed results are stored and organized in the [Apache Cassandra](http://cassandra.apache.org/) database service according to partition keys `chemistry` and `test_type` and clustering key `cycle: decending`. The [Dash](https://dash.plot.ly/introduction) service queries the database and refreshes the interactive GUI dashboard every 30 seconds. To optimize throughput, cluster nodes are allocated to services as follows:
+Each tracked battery publishes raw measurements to the [Apache Kafka] service (into 1 kafka topic, 3 partitions). These raw measurements are consumed by the [Spark Streaming](https://spark.apache.org/streaming/) service and transformed into meaningful metrics via RDD MapReduce tasks. Analyzed results are stored and organized in the [Apache Cassandra](http://cassandra.apache.org/) database service according to partition keys `chemistry` and `test_type` and clustering key `cycle`. The [Dash](https://dash.plot.ly/introduction) service queries the database and refreshes the interactive GUI dashboard every 30 seconds. On the control node, the [Insight Pegasus](https://github.com/InsightDataScience/pegasus) service (not shown) is used to maintain and manage all cluster nodes. To optimize throughput, cluster nodes are allocated to services as follows:
 
 | Technology             | Nodes | Purpose                                                                          |
 |------------------------|-------|----------------------------------------------------------------------------------|
@@ -45,7 +46,7 @@ The Spark Streaming service executes MapReduce tasks across 3 worker nodes. To o
 ## Quick Start
 ChargeTracker is executed on a multi-node cluster. Deployment via [Insight Pegasus](https://github.com/InsightDataScience/pegasus) on [AWS Cloud EC2](https://aws.amazon.com/ec2/) is recommended. The project documentation includes detailed instructions for [cluster setup](doc/cluster_setup.md) and [manual installation](doc/manual_install.md).
 
-From control node, initiate all cluster services using [Insight Pegasus](https://github.com/InsightDataScience/pegasus):
+From control node, initiate all cluster services using Pegasus:
 ```
 CHARGE_TRACKER_HOME=~/charge_tracker
 # Starts Cassandra service
