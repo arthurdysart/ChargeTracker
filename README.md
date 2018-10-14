@@ -29,7 +29,7 @@ ChargeTracker is a streaming analysis pipeline built with open-source technologi
 
 ![ChargeTracker shows near real-time metrics derived from raw sensor measurements](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/pipeline.png)
 
-Each battery publishes its raw measurements to [Kafka](https://kafka.apache.org/) (1 topic, 6 partitions). These raw measurements are consumed by [Spark Streaming](https://spark.apache.org/streaming/) and transformed into meaningful metrics via RDD-MapReduce tasks. Resulting metrics are stored in the [Cassandra](http://cassandra.apache.org/) database according to partition keys `chemistry` and `test_type` and clustering key `cycle`. The [Dash](https://dash.plot.ly/introduction) service queries the database and refreshes the interactive GUI dashboard every 30 seconds. On the control node, [Insight Pegasus](https://github.com/InsightDataScience/pegasus) (not shown) manages all cluster nodes. To optimize throughput, cluster nodes are allocated to services as follows:
+Each battery publishes its raw measurements to [Kafka](https://kafka.apache.org/) (1 topic, 6 partitions). These raw measurements are consumed by [Spark Streaming](https://spark.apache.org/streaming/) and transformed into meaningful metrics via RDD-MapReduce tasks. Resulting metrics are stored in the [Cassandra](http://cassandra.apache.org/) database according to partition keys `chemistry` and `test_type` and clustering key `cycle`. The [Plotly Dash](https://dash.plot.ly/introduction) service queries the database and refreshes the interactive GUI dashboard every 30 seconds. On the control node, [Insight Pegasus](https://github.com/InsightDataScience/pegasus) (not shown) manages all cluster nodes. To optimize throughput, cluster nodes are allocated to services as follows:
 
 | Technology             | Nodes | Purpose                                                                          |
 |------------------------|-------|----------------------------------------------------------------------------------|
@@ -49,21 +49,50 @@ ChargeTracker is executed on a multi-node cluster. Deployment via [Insight Pegas
 From control node, initiate all cluster services using Pegasus:
 ```
 CHARGE_TRACKER_HOME=~/charge_tracker
+CASSANDRA_CLUSTER=<cassandra-cluster-alias>
+KAFKA_CLUSTER=<kafka-cluster-alias>
+SPARK_CLUSTER=<spark-cluster-alias>
+DASH_CLUSTER=<dash-cluster-alias>
+TMUX_CLUSTER=<tmux-cluster-alias>
+
+# Initiates control node with "ChargeTracker" github repository
+eval `ssh-agent -s`
+sudo git clone https://github.com/arthurdysart/ChargeTracker.git ~/charge_tracker
+
 # Starts Cassandra service
-peg fetch <cassandra-cluster-alias>
-peg sshcmd-node <cassandra-cluster-alias> 1 "sudo bash $CHARGE_TRACKER_HOME/src/cassandra/start_service.sh"
-# Starts Kafka service
-peg fetch <kafka-cluster-alias>
-peg sshcmd-node <kafka-cluster-alias> 1 "sudo bash $CHARGE_TRACKER_HOME/src/kafka/start_service.sh"
-# Starts Spark service
-peg fetch <spark-cluster-alias>
-peg sshcmd-node <spark-cluster-alias> 1 "sudo bash $CHARGE_TRACKER_HOME/src/spark/start_service.sh"
+peg fetch $CASSANDRA_CLUSTER
+peg install $CASSANDRA_CLUSTER cassandra
+peg service $CASSANDRA_CLUSTER cassandra start
+peg sshcmd-cluster $CASSANDRA_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git ~/charge_tracker"
+peg sshcmd-node $CASSANDRA_CLUSTER 1 "sudo bash $CHARGE_TRACKER_HOME/src/cassandra/run_service.sh"
+
+# Starts Kafka and Zookeeper services
+peg fetch $KAFKA_CLUSTER
+peg install $KAFKA_CLUSTER zookeeper
+peg service $KAFKA_CLUSTER zookeeper start
+peg install $KAFKA_CLUSTER kafka
+peg service $KAFKA_CLUSTER kafka start
+peg sshcmd-cluster $KAFKA_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git ~/charge_tracker"
+peg sshcmd-node $KAFKA_CLUSTER 1 "sudo bash $CHARGE_TRACKER_HOME/src/kafka/run_service.sh"
+
+# Starts Spark and Hadoop services
+peg fetch $SPARK_CLUSTER
+peg install $SPARK_CLUSTER hadoop
+peg service $SPARK_CLUSTER hadoop start
+peg install $SPARK_CLUSTER spark
+peg service $SPARK_CLUSTER spark start
+peg sshcmd-cluster $SPARK_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git ~/charge_tracker"
+peg sshcmd-node $SPARK_CLUSTER 1 "sudo bash $CHARGE_TRACKER_HOME/src/spark/run_service.sh"
+
 # Starts Dash service
-peg fetch <dash-cluster-alias>
-peg sshcmd-node <dash-cluster-alias> 1 "sudo bash $CHARGE_TRACKER_HOME/src/dash/start_service.sh"
+peg fetch $DASH_CLUSTER
+peg sshcmd-cluster $DASH_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git ~/charge_tracker"
+peg sshcmd-node $DASH_CLUSTER 1 "sudo bash $CHARGE_TRACKER_HOME/src/dash/run_service.sh"
+
 # Starts Tmux multi-producer service
-peg fetch <tmux-cluster-alias>
-peg sshcmd-node <tmux-cluster-alias> 1 "sudo bash $CHARGE_TRACKER_HOME/src/tmux/start_service.sh"
+peg fetch $TMUX_CLUSTER
+peg sshcmd-cluster $TMUX_CLUSTER "sudo git clone https://github.com/arthurdysart/ChargeTracker.git ~/charge_tracker"
+peg sshcmd-node $TMUX_CLUSTER 1 "sudo bash $CHARGE_TRACKER_HOME/src/tmux/run_service.sh"
 ```
 
 From local computer, open the live GUI dashboard:
