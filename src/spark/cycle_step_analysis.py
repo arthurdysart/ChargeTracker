@@ -127,7 +127,7 @@ def send_partition(entries, table_name, crit_size=500):
     # Prepares CQL statement, with interpolated table name, and placeholders
     cql_command = db_session.prepare("""
                                      UPDATE {} SET
-                                     value =  ? + value,
+                                     value =  ? + value
                                      WHERE cathode = ?
                                      AND cycle = ?
                                      AND id = ?;
