@@ -62,7 +62,6 @@ def summarize_step_data(kafka_stream):
     # For each micro-RDD, strips whitespace and split by comma
     parsed_rdd = kafka_stream.map(lambda ln: \
         tuple(x.strip() for x in ln[1].strip().split(",")))
-    #parsed_rdd.pprint(3)
 
     # Transforms parsed entries into key-value pair
     # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>) :
@@ -71,8 +70,7 @@ def summarize_step_data(kafka_stream):
     paired_rdd = parsed_rdd.map(lambda x: \
         ((int(x[0]), str(x[1]), int(x[2]), str(x[3]),), \
          (str(x[4]), float(x[5]), float(x[6]), float(x[7]), float(x[8]),)))
-    #paired_rdd.pprint(3)
-    
+
     # Calculates instantaneous capacity, energy, and power for each entry
     # SCHEMA: (key) :
     #         (<capacity: float>, <energy: float>, <power: float>,
@@ -83,7 +81,6 @@ def summarize_step_data(kafka_stream):
          x[1][2] * (x[1][1] + x[1][3]) * DELTA_TIME / (2 * ENG_CONVERSION), \
          x[1][2] * x[1][1] / PWR_CONVERSION, \
          1,)))
-    #inst_rdd.pprint(3)
 
     # Calculates total capacity and energy, and power sum for each key
     # SCHEMA: (key) :
@@ -94,24 +91,26 @@ def summarize_step_data(kafka_stream):
          i[1] + j[1], \
          i[2] + j[2], \
          i[3] + j[3],))
-    #total_rdd.pprint(3)
 
     # Re-organizes key and value contents for Cassandra CQL interpolation
-    # SCHEMA: <cathode: str>, <total capacity: float>, <total energy: float>,
-    #         <power sum: float>, <counts: float>, <step: str>, <cycle: int>,
-    #         <battery id: str>
+    # SCHEMA: <step: str>, <cathode: str>, <cycle: int>, <battery id: str>,
+    #         <total capacity: float>, <total energy: float>,
+    #         <power sum: float>, <counts: float>,
     summary_rdd = total_rdd.map(lambda x: \
-        (x[0][1], \
+        (x[0][3], \
+         x[0][1], \
+         x[0][2], \
+         x[0][0], \
          x[1][0], \
          x[1][1], \
          x[1][2], \
-         x[1][3], \
-         x[0][3], \
-         x[0][2], \
-         x[0][0],))
-    #summary_rdd.pprint(3)
+         x[1][3],))
 
-    return summary_rdd
+    # Filters according to charge and discharge steps
+    discharge_rdd = summary_rdd.filter(lambda x: x[0][0].upper() == "D")
+    charge_rdd = summary_rdd.filter(lambda x: x[0][0].upper() == "C")
+
+    return discharge_rdd, charge_rdd
 
 def send_partition(entries, table_name, crit_size=500):
     """
@@ -120,44 +119,39 @@ def send_partition(entries, table_name, crit_size=500):
     """
 
     # Initializes keyspace and CQL batch executor in Cassandra database
-    db_cass = cassc.Cluster(p["cassandra"]).connect(p["cassandra_key"])
+    db_session = cassc.Cluster(p["cassandra"]).connect(p["cassandra_key"])
     cql_batch = cassq.BatchStatement(consistency_level= \
                                      cass.ConsistencyLevel.QUORUM)
     batch_size = 0
 
     # Prepares CQL statement, with interpolated table name, and placeholders
-    cql_command = db_cass.prepare("""
-                                  UPDATE {} SET
-                                  capacity =  ? + capacity,
-                                  energy = ? + energy,
-                                  power = ? + power,
-                                  counts = ? + counts
-                                  WHERE cathode = ? AND step = ?
-                                  AND cycle = ? AND id = ?;
-                                  """.format(table_name))
+    cql_command = db_session.prepare("""
+                                     UPDATE {} SET
+                                     value =  ? + value,
+                                     WHERE cathode = ?
+                                     AND cycle = ?
+                                     AND id = ?;
+                                     """.format(table_name))
 
     for e in entries:
+
         # Interpolates prepared CQL statement with values from entry
         cql_batch.add(cql_command, parameters= \
-                      [cassq.ValueSequence((e[1],)), \
-                       cassq.ValueSequence((e[2],)), \
-                       cassq.ValueSequence((e[3],)), \
-                       cassq.ValueSequence((e[4],)), \
+                      [cassq.ValueSequence((e[3],)), \
                        e[0], \
-                       e[5], \
-                       e[6], \
-                       e[7],])
+                       e[1], \
+                       e[2],])
         batch_size += 1
         # Executes collected CQL commands, then re-initializes collection
         if batch_size == crit_size:
-            db_cass.execute(cql_batch)
+            db_session.execute(cql_batch)
             cql_batch = cassq.BatchStatement(consistency_level= \
                                              cass.ConsistencyLevel.QUORUM)
             batch_size = 0
 
     # Executes final set of remaining batches and closes Cassandra session
-    db_cass.execute(cql_batch)
-    db_cass.shutdown()
+    db_session.execute(cql_batch)
+    db_session.shutdown()
 
     return None
 
@@ -176,7 +170,8 @@ def save_to_file(input_rdd, file_name):
     For each micro-RDD, saves input data to text file.
 
     EXAMPLE:
-    save_to_file(parsed_rdd, "/home/ubuntu/overview/src/spark/dstream_stdout/{}.txt")
+    save_to_file(parsed_rdd,
+                 "/home/ubuntu/overview/src/spark/dstream_stdout/{}.txt")
     """
     input_rdd.foreachRDD(lambda rdd: open(file_name, "a") \
                          .write(str(rdd.collect()) + "\n"))
@@ -197,10 +192,39 @@ if __name__ == "__main__":
                                               p["kafka_broker"]})
 
     # For each micro-RDD, transforms measurements to summary/overall values
-    summary_rdd = summarize_step_data(kafka_stream)
+    # SCHEMA: (<cathode: str>, <cycle: int>,
+    #          <battery id: str>, <total capacity or energy>, ...)
+    discharge_rdd, charge_rdd = summarize_step_data(kafka_stream)
 
-    # For each cathode, filters data and sends to Cassandra database
-    save_to_database(summary_rdd, "battery_data")
+    discharge_rdd.pprint(20)
+    charge_rdd.pprint(20)
+
+    discharge_capacity_rdd = discharge_rdd.map(lambda x: (x[0][1], \
+                                                          x[0][2], \
+                                                          x[0][3], \
+                                                          x[0][4]))
+    save_to_database(discharge_capacity_rdd, "discharge_capacity")
+
+
+    charge_capacity_rdd = charge_rdd.map(lambda x: (x[0][1], \
+                                                    x[0][2], \
+                                                    x[0][3], \
+                                                    x[0][4]))
+    save_to_database(charge_capacity_rdd, "charge_capacity")
+
+
+    discharge_energy_rdd = discharge_rdd.map(lambda x: (x[0][1], \
+                                                        x[0][2], \
+                                                        x[0][3], \
+                                                        x[0][5]))
+    save_to_database(discharge_energy_rdd, "discharge_energy")
+
+
+    charge_energy_rdd = charge_rdd.map(lambda x: (x[0][1], \
+                                                  x[0][2], \
+                                                  x[0][3], \
+                                                  x[0][5]))
+    save_to_database(charge_energy_rdd, "charge_energy")
 
     # Starts and stops spark streaming context
     ssc.start()
