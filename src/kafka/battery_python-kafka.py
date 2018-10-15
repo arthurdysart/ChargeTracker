@@ -43,7 +43,7 @@ def stdin(sys_argv):
         p["current"] = abs(float(sys_argv[3]))
         p["v_min"] = float(sys_argv[4])
         p["v_range"] = float(sys_argv[5]) - p["v_min"]
-        p["kafka_broker"] = settings.get("KAFKA_BROKER")
+        p["kafka_brokers"] = settings.get("KAFKA_BROKERS", cast=dc.Csv())
         p["kafka_topic"] = settings.get("KAFKA_TOPIC")
         p["initial_time"] = dt.datetime.now()
     except:
@@ -129,8 +129,7 @@ if __name__ == "__main__":
     p = stdin(sys.argv)
 
     # Creates Kafka producer
-    print(p["kafka_broker"])
-    kafka_prod = kk.KafkaProducer(bootstrap_servers=p["kafka_broker"])
+    kafka_prod = kk.KafkaProducer(bootstrap_servers=p["kafka_brokers"])
 
     # Generates data for each battery cycle, and publishes to Kafka broker
     count = sum(generate_cycle_data(n, p, kafka_prod) for n in p["cycles"])

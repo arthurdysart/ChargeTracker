@@ -42,7 +42,7 @@ def stdin(sys_argv):
         p["spark_name"]= settings.get("SPARK_NAME")
         p["cassandra"] = settings.get("CASSANDRA_MASTER", cast=dc.Csv())
         p["cassandra_key"] = settings.get("CASSANDRA_KEYSPACE")
-        p["kafka_broker"] = settings.get("KAFKA_BROKER")
+        p["kafka_brokers"] = settings.get("KAFKA_BROKERS")
         p["kafka_topic"] = settings.get("KAFKA_TOPIC", cast=dc.Csv())
     except:
         raise ValueError("Cannot interpret external settings. Check ENV file.")
@@ -186,8 +186,7 @@ if __name__ == "__main__":
     sc = SparkContext(appName=p["spark_name"])
     sc.setLogLevel("WARN")
     ssc = StreamingContext(sc, 30)
-    kafka_params = {"metadata.broker.list": "ec2-54-236-122-152.compute-1.amazonaws.com:9092,ec2-54-84-33-88.compute-1.amazonaws.com:9092,ec2-52-73-191-175.compute-1.amazonaws.com:9092,ec2-35-153-92-150.compute-1.amazonaws.com:9092"}
-    #kafka_params = {"bootstrap.servers": p["kafka_broker"]}
+    kafka_params = {"metadata.broker.list": p["kafka_brokers"]}
     kafka_stream = kfk.createDirectStream(ssc, \
                                           p["kafka_topic"], \
                                           kafka_params)
