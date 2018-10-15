@@ -66,8 +66,7 @@ def analyze_all_groups():
     pg = df_all.groupby(["cathode", "cycle"])
     df = pd.DataFrame({"mean": pg["value"].mean(),
                        "stdev": pg["value"].std(),
-                       "count": pg["value"].count(),
-                       "step": "discharge"}).reset_index()
+                       "count": pg["value"].count(),}).reset_index()
     df["error"] = df["stdev"] * 100.0 / df["mean"]
     return df
 
@@ -81,16 +80,15 @@ def make_trace(df, c, colors):
     y_hi = (df_sub["mean"] + df_sub["stdev"]).tolist()
     y_lo = (df_sub["mean"] - df_sub["stdev"]).tolist()
 
-    metadata = zip(df_sub["cathode"].tolist(),
+    metadata = zip(df_sub["mean"].tolist(),
+                   df_sub["error"].tolist(),
+                   df_sub["cathode"].tolist(),
                    df_sub["count"].tolist(),
-                   df_sub["cycle"].tolist(),
-                   df_sub["step"].tolist(),
-                   df_sub["mean"].tolist(),
-                   df_sub["error"].tolist(),)
+                   df_sub["cycle"].tolist(),)
     mouseover_text = ["Average: {:.3f} Ah &#177; {:.1f} %"
                       "Chemistry: {}<br>"
                       "Batteries: {}<br>"
-                      "Cycle: {} {}<br>"\
+                      "Cycle: {} discharge<br>"\
                       .format(*t) for t in metadata]
 
     data_val = go.Scatter(x = x,
