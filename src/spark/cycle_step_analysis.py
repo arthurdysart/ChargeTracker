@@ -127,10 +127,10 @@ def send_partition(entries, table_name, crit_size=500):
     # Prepares CQL statement, with interpolated table name, and placeholders
     cql_command = db_session.prepare("""
                                      UPDATE {} SET
-                                     value =  ? + value,
-                                     id = ?
+                                     value =  ? + value
                                      WHERE cathode = ?
-                                     AND cycle = ?;
+                                     AND cycle = ?
+                                     AND id = ?;
                                      """.format(table_name))
 
     for e in entries:
@@ -138,9 +138,9 @@ def send_partition(entries, table_name, crit_size=500):
         # Interpolates prepared CQL statement with values from entry
         cql_batch.add(cql_command, parameters= \
                       [cassq.ValueSequence((e[3],)), \
-                       e[2], \
                        e[0], \
-                       e[1],])
+                       e[1], \
+                       e[2],])
         batch_size += 1
         # Executes collected CQL commands, then re-initializes collection
         if batch_size == crit_size:
