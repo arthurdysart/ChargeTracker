@@ -199,31 +199,31 @@ if __name__ == "__main__":
     discharge_rdd.pprint(20)
     charge_rdd.pprint(20)
 
-    discharge_capacity_rdd = discharge_rdd.map(lambda x: (x[0][1], \
-                                                          x[0][2], \
-                                                          x[0][3], \
-                                                          x[0][4]))
+    discharge_capacity_rdd = discharge_rdd.map(lambda x: (x[1], \
+                                                          x[2], \
+                                                          x[3], \
+                                                          x[4]))
     save_to_database(discharge_capacity_rdd, "discharge_capacity")
 
 
-    charge_capacity_rdd = charge_rdd.map(lambda x: (x[0][1], \
-                                                    x[0][2], \
-                                                    x[0][3], \
-                                                    x[0][4]))
+    charge_capacity_rdd = charge_rdd.map(lambda x: (x[1], \
+                                                    x[2], \
+                                                    x[3], \
+                                                    x[4]))
     save_to_database(charge_capacity_rdd, "charge_capacity")
 
 
-    discharge_energy_rdd = discharge_rdd.map(lambda x: (x[0][1], \
-                                                        x[0][2], \
-                                                        x[0][3], \
-                                                        x[0][5]))
+    discharge_energy_rdd = discharge_rdd.map(lambda x: (x[1], \
+                                                        x[2], \
+                                                        x[3], \
+                                                        x[5]))
     save_to_database(discharge_energy_rdd, "discharge_energy")
 
 
-    charge_energy_rdd = charge_rdd.map(lambda x: (x[0][1], \
-                                                  x[0][2], \
-                                                  x[0][3], \
-                                                  x[0][5]))
+    charge_energy_rdd = charge_rdd.map(lambda x: (x[1], \
+                                                  x[2], \
+                                                  x[3], \
+                                                  x[5]))
     save_to_database(charge_energy_rdd, "charge_energy")
 
     # Starts and stops spark streaming context
