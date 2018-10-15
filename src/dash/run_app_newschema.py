@@ -3,7 +3,7 @@ Displays summary visual showing aggreagated battery data using Dash library.
 Graph 
 
 Template:
-sudo python run_app.py
+sudo python run_app_newschema.py
 """
 
 # IMPORTED LIBRARIES
@@ -58,17 +58,17 @@ def analyze_all_groups():
                              cathode,
                              cycle,
                              id,
-                             double_sum(value) AS capacity
+                             double_sum(value) AS value
                              FROM battery_metrics.discharge_capacity;
                              """)
 
     # Calculates aggreates (mean, std dev, count, error, upper/lower limits)
-    pg = df_all.groupby(["cathode", "cycle", "step"])
-    df = pd.DataFrame({"mean": pg["sum_val"].mean(),
-                       "stdev": pg["sum_val"].std(),
-                       "count": pg["sum_val"].count(),}).reset_index()
+    pg = df_all.groupby(["cathode", "cycle"])
+    df = pd.DataFrame({"mean": pg["value"].mean(),
+                       "stdev": pg["value"].std(),
+                       "count": pg["value"].count(),
+                       "step": "discharge"}).reset_index()
     df["error"] = df["stdev"] * 100.0 / df["mean"]
-
     return df
 
 def make_trace(df, c, colors):
