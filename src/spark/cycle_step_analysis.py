@@ -186,18 +186,17 @@ if __name__ == "__main__":
     sc = SparkContext(appName=p["spark_name"])
     sc.setLogLevel("WARN")
     ssc = StreamingContext(sc, 30)
+    kafka_params = {"metadata.broker.list": "ec2-54-236-122-152.compute-1.amazonaws.com:9092,ec2-54-84-33-88.compute-1.amazonaws.com:9092,ec2-52-73-191-175.compute-1.amazonaws.com:9092,ec2-35-153-92-150.compute-1.amazonaws.com:9092"}
+    #kafka_params = {"bootstrap.servers": p["kafka_broker"]}
     kafka_stream = kfk.createDirectStream(ssc, \
                                           p["kafka_topic"], \
-                                          {"bootstrap.servers": \
-                                              p["kafka_broker"]})
+                                          kafka_params)
 
     # For each micro-RDD, transforms measurements to summary/overall values
     # SCHEMA: (<cathode: str>, <cycle: int>,
-    #          <battery id: str>, <total capacity or energy>, ...)
+    #          <battery id: str>, <capacity sum: dbl>, <energy sum: dbl>,
+    #          <power sum: dbl>, <counts: int>)
     discharge_rdd, charge_rdd = summarize_step_data(kafka_stream)
-
-    discharge_rdd.pprint(20)
-    charge_rdd.pprint(20)
 
     discharge_capacity_rdd = discharge_rdd.map(lambda x: (x[1], \
                                                           x[2], \
