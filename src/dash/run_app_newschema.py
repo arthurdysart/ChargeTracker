@@ -9,7 +9,6 @@ sudo python run_app.py
 # IMPORTED LIBRARIES
 from dash.dependencies import Input
 from dash.dependencies import Output
-from plotly.graph_objs import Figure
 from cassandra.cluster import Cluster
 from itertools import chain as flat
 
@@ -21,7 +20,7 @@ import plotly.graph_objs as go
 
 ## GLOBAL DEFINITIONS 
 # Sets Cassandra database parameters
-cass_db = Cluster(["10.0.0.74"]).connect("battery_data")
+db_session = Cluster(["10.0.0.74"]).connect()
 
 # Sets Dash application parameters
 app = dash.Dash("Charge_Tracker",
@@ -34,15 +33,7 @@ app.layout = html.Div([html.Div([dcc.Graph(id="capacity_tracker",
                                        "display": "scatter"}),
                                 dcc.Interval(id="real_time_updates",
                                              interval=10000,
-                                             n_intervals=0),
-
-                       html.Div([generate_table(),],
-                                style={"width": "100%",
-                                       "height": "auto",
-                                       "display": "scatter"}),],
-                       style={"width": "90%",
-                               "display": "scatter"})
-
+                                             n_intervals=0),])
     
 ## FUNCTION DEFINITIONS
 def create_dataframe(colnames, rows):
@@ -55,19 +46,20 @@ def query_cassandra(query):
     """
     Queries Cassandra database according to input CQL statement.
     """
-    return cass_db.execute(query, timeout=None)._current_rows
+    return db_session.execute(query, timeout=None)._current_rows
 
 def analyze_all_groups():
     """
     Aggregates queried Cassandra data by mean, std dev, counts, and error.
     """
     # Pulls all data from Cassandra into Pandas dataframe
-    # TODO: Fix table schema?
     df_all = query_cassandra("""
-                             SELECT step, id, cathode, cycle,
-                             double_sum(capacity) AS sum_val
-                             FROM battery_data WHERE step = 'D'
-                             ALLOW FILTERING;
+                             SELECT
+                             cathode,
+                             cycle,
+                             id,
+                             double_sum(value) AS capacity
+                             FROM battery_metrics.discharge_capacity;
                              """)
 
     # Calculates aggreates (mean, std dev, count, error, upper/lower limits)
@@ -81,7 +73,7 @@ def analyze_all_groups():
 
 def make_trace(df, c, colors):
     """
-    For selected cathode "c", creates plot.ly scatter objects.
+    For selected cathode "c", creates Plotly scatter objects.
     """
     df_sub = df[df.cathode == c]
     x = df_sub["cycle"].tolist()
@@ -237,7 +229,7 @@ def generate_table(max_rows=15):
     """
     Creates HTML table sorted by decreasing std dev.
     """
-    df = query_analyze_cassandra()
+    #df = query_analyze_cassandra()
     
     row_header = [html.Tr([html.Th(c) for c in df.columns])]
     row_data = [html.Tr([html.Td(df.iloc[i][c]) for c in df.columns]) for i in range(min(len(df), max_rows))]
@@ -249,8 +241,8 @@ def generate_table(max_rows=15):
 ## MAIN MODULE
 if __name__ == "__main__":
     # Sets formatting for retrieved database query
-    cass_db.row_factory = create_dataframe
-    cass_db.default_fetch_size = None
+    db_session.row_factory = create_dataframe
+    db_session.default_fetch_size = None
 
     # Starts Flask/Dash app
     app.run_server(debug=True, host="0.0.0.0", port=80)
