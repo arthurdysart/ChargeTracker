@@ -143,7 +143,7 @@ def make_trace(df, c, colors):
     For selected group "c", creates Plotly scatter objects.
     """
     df_sub = df[df.group == c]
-    x = (df_sub["cycle"] + 1).tolist()
+    x = (df_sub["cycle"]).tolist()
     y = df_sub["mean"].tolist()
     y_hi = (df_sub["mean"] + df_sub["stdev"]).tolist()
     y_lo = (df_sub["mean"] - df_sub["stdev"]).tolist()
@@ -249,7 +249,6 @@ def update_table(group_name, cycle_number, max_rows=50):
     mean = df["energy"].mean()
     stdev = df["energy"].std()
     df["percent deviation"] = (df["energy"] - mean) * 100.0 / (2.0 * stdev)
-    df["cycle"] += 1
     df.sort_values(by="percent deviation", ascending=False)
 
     for n in ("energy", "percent deviation"):
