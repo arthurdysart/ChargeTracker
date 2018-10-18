@@ -175,14 +175,6 @@ def update_graph(interval):
 
     return go.Figure(data = data, layout = layout)
 
-def analyze_one_group(group_name, cycle_number):
-    """
-    Aggregates battery data for selected battery group.
-    """
-
-
-    return df
-
 # Callback updates graph (OUTPUT) according to time interval (INPUT)
 @app.callback(Output('group_detail', 'rows'),
               [Input('table_groups', 'value'),
@@ -194,20 +186,20 @@ def update_table(group_name, cycle_number, max_rows=50):
     # Pulls all data from Cassandra into Pandas dataframe
     df = query_cassandra("""
                          SELECT
-                         id,
-                         cathode,
-                         cycle,
-                         double_sum(value) AS metric
+                         id AS ID,
+                         cathode AS Cathode,
+                         cycle AS Cycle,
+                         double_sum(value) AS Energy
                          FROM battery_metrics.discharge_energy
                          WHERE cathode=\'{}\' AND cycle={};
                          """.format(group_name, cycle_number))
 
     # Calculates aggreates (mean, std dev, and percent deviation)
-    mean = df["metric"].mean()
-    stdev = df["metric"].std()    
-    df["Percent deviation"] = abs(df["metric"] - mean) * 100.0 / (2.0 * stdev)
+    mean = df["Energy"].mean()
+    stdev = df["Energy"].std()
+    df["Percent deviation"] = abs(df["Energy"] - mean) * 100.0 / (2.0 * stdev)
     df.sort_values(by="Percent deviation", ascending=False)
-    df = df[["id", "cathode", "cycle", "Percent deviation"]]
+    df = df[["ID", "Cathode", "Cycle", "Energy", "Percent deviation"]]
 
     return df.to_dict("records")
 
