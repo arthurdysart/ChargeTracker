@@ -179,24 +179,7 @@ def analyze_one_group(group_name, cycle_number):
     """
     Aggregates battery data for selected battery group.
     """
-    # Pulls all data from Cassandra into Pandas dataframe
-    df_all = query_cassandra("""
-                             SELECT
-                             cathode,
-                             cycle,
-                             id,
-                             double_sum(value) AS value
-                             FROM battery_metrics.discharge_energy
-                             WHERE cathode=\'{}\' AND cycle={};
-                             """.format(group_name, cycle_number))
 
-    # Calculates aggreates (mean, std dev, count, error, upper/lower limits)
-    pg = df_all.groupby(["cathode", "cycle"])
-    df = pd.DataFrame({"mean": pg["value"].mean(),
-                       "stdev": pg["value"].std(),
-                       "count": pg["value"].count(),}).reset_index()
-    df["error"] = df["stdev"] * 100.0 / df["mean"]
-    df.sort_values(by='stdev', ascending=False)
 
     return df
 
@@ -208,7 +191,22 @@ def update_table(group_name, cycle_number, max_rows=50):
     """
     Queries table, analyzes data, and assembles results in Dash format.
     """
-    df = analyze_one_group(group_name, cycle_number)
+    # Pulls all data from Cassandra into Pandas dataframe
+    df = query_cassandra("""
+                         SELECT
+                         id,
+                         cathode,
+                         cycle,
+                         double_sum(value) AS metric
+                         FROM battery_metrics.discharge_energy
+                         WHERE cathode=\'{}\' AND cycle={};
+                         """.format(group_name, cycle_number))
+
+    # Calculates aggreates (mean, std dev, count, error, upper/lower limits)
+    mean = df["value"].mean()
+    stdev = df["value"].std()
+    
+    df["Percent deviation"] = abs(df["value"] - mean) * 100.0 / stdev
 
     return df.to_dict('records')
 
