@@ -59,7 +59,7 @@ def analyze_all_groups():
                              cycle,
                              id,
                              double_sum(value) AS value
-                             FROM battery_metrics.discharge_capacity;
+                             FROM battery_metrics.discharge_energy;
                              """)
 
     # Calculates aggreates (mean, std dev, count, error, upper/lower limits)
