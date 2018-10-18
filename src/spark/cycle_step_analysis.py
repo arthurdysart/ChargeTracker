@@ -185,7 +185,7 @@ if __name__ == "__main__":
     # Initializes spark context SC and streaming context SCC
     sc = SparkContext(appName=p["spark_name"])
     sc.setLogLevel("WARN")
-    ssc = StreamingContext(sc, 30)
+    ssc = StreamingContext(sc, 10)
     kafka_params = {"metadata.broker.list": p["kafka_brokers"]}
     kafka_stream = kfk.createDirectStream(ssc, \
                                           p["kafka_topic"], \
