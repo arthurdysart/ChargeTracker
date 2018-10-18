@@ -52,8 +52,8 @@ app.layout = html.Div([
                         dcc.Dropdown(
                             id="table_groups",
                             options=[{"label": x, "value": x} for x in groups],
-                            placeholder="Select battery group",
-                            value="W"),
+                            placeholder="Select battery group...",
+                            value=""),
                         style={
                                 "width": "48%",
                                 "display": "inline-block"}
@@ -62,8 +62,8 @@ app.layout = html.Div([
                         dcc.Dropdown(
                             id="table_cycles",
                             options=[{"label": x, "value": x} for x in cycles],
-                            placeholder="Select cycle",
-                            value="0"),
+                            placeholder="Select iteration number...",
+                            value=""),
                         style={
                                 "width": "48%",
                                 "float": "right",
@@ -79,7 +79,8 @@ app.layout = html.Div([
                 "align": "center",
                 "width": "90%",
                 "height": "auto",
-                "display": "inline-block"}
+                "display": "inline-block",
+                "margin": "0 auto"}
         )
 
 ## FUNCTION DEFINITIONS
