@@ -41,14 +41,13 @@ app.layout = html.Div([html.Div([dcc.Graph(id="capacity_tracker",
                                         "display": "scatter"}),
                        html.Div([dcc.Dropdown(id="table_groups",
                                               options=[{"label": x, "value": x} for x in groups],
+                                              placeholder="Select battery group",
                                               value="W"),
                                  dcc.Dropdown(id="table_cycles",
                                               options=[{"label": x, "value": x} for x in cycles],
-                                              value="Select battery group"),
+                                              placeholder="Select cycle (first: 0)",
+                                              value="0"),
                                  dte.DataTable(rows=[{}],
-                                               row_selectable=True,
-                                               filterable=True,
-                                               sortable=True,
                                                selected_row_indices=[],
                                                id="group_detail")])],
                       style={"width": "100%",
@@ -205,17 +204,13 @@ def analyze_one_group(group_name, cycle_number):
 @app.callback(Output('group_detail', 'rows'),
               [Input('table_groups', 'value'),
                Input('table_cycles', 'value')])
-def update_table(group_name, cycle_number, max_rows=25):
+def update_table(group_name, cycle_number, max_rows=50):
     """
     Queries table, analyzes data, and assembles results in Dash format.
     """
     df = analyze_one_group(group_name, cycle_number)
 
-    table = html.Table([html.Tr([html.Th(col) for col in df.columns])] + \
-        [html.Tr([html.Td(df.iloc[i][col]) for col in df.columns]) \
-         for i in range(min(len(df), max_rows))])
-
-    return table
+    return df.to_dict('records')
 
 
 ## MAIN MODULE
