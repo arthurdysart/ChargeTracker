@@ -94,6 +94,7 @@ def make_trace(df, c, colors):
     data_val = go.Scatter(x = x,
                           y = y,
                           hoverinfo = "text",
+                          legendgroup = "Material {}".format(c),
                           line = {"color": colors[c][0]},
                           mode = "lines+markers",
                           name = "Material {}".format(c),
@@ -104,6 +105,7 @@ def make_trace(df, c, colors):
                           fill = "tozerox",
                           fillcolor = colors[c][1],
                           hoverinfo = "none",
+                          legendgroup = "Material {}".format(c),
                           line = {"color": "rgba(255,255,255,0)"},
                           showlegend = False,
                           name = "Material {}".format(c),)
@@ -133,8 +135,8 @@ def update_capacity_graph(interval):
 
     # Sets layout 
     layout = go.Layout(hovermode = "closest",
-                       legend = {'x': 0, 'y': 1},
-                       margin = {'l': 40, 'b': 40, 't': 10, 'r': 10},
+                       legend = {"orientation": "h"},
+                       margin = {"l": 40, "b": 40, "t": 10, "r": 10},
                        #paper_bgcolor = "rgb(255,255,255)",
                        #plot_bgcolor = "rgb(229,229,229)",
                        xaxis = {"title": "Number of discharges",
@@ -200,7 +202,7 @@ def update_battery_table(interval):
 
     # Sets layout 
     layout = go.Layout(hovermode = "closest",
-                       legend = {'x': 0, 'y': 1},
+                       legend = {'x': 0, 'y': 1, orientation'h"},
                        margin = {'l': 40, 'b': 40, 't': 10, 'r': 10},
                        #paper_bgcolor = "rgb(255,255,255)",
                        #plot_bgcolor = "rgb(229,229,229)",
