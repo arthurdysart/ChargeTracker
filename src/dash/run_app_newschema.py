@@ -60,7 +60,7 @@ app.layout = html.Div([
                 html.Div(
                         dcc.Dropdown(
                             id="table_cycles",
-                            options=[{"label": x, "value": x} for x in groups],
+                            options=[{"label": x, "value": x} for x in cycles],
                             placeholder="Select cycle",
                             value="0"),
                         style={
@@ -76,7 +76,8 @@ app.layout = html.Div([
         ],
         style={
                 "width": "90%",
-                "height": "auto"}
+                "height": "auto",
+                "align": "center"}
         )
 
 ## FUNCTION DEFINITIONS
