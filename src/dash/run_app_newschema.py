@@ -203,10 +203,10 @@ def update_table(group_name, cycle_number, max_rows=50):
                          """.format(group_name, cycle_number))
 
     # Calculates aggreates (mean, std dev, count, error, upper/lower limits)
-    mean = df["value"].mean()
-    stdev = df["value"].std()
+    mean = df["metric"].mean()
+    stdev = df["metric"].std()
     
-    df["Percent deviation"] = abs(df["value"] - mean) * 100.0 / stdev
+    df["Percent deviation"] = abs(df["metric"] - mean) * 100.0 / stdev
 
     return df.to_dict('records')
 
