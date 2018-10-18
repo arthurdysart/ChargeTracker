@@ -26,6 +26,7 @@ db_session = Cluster(["10.0.0.74"]).connect()
 # Sets dropdown options
 groups = ["W", "X", "Y", "Z"]
 cycles = [str(x) for x in range(1000)]
+table_order = ["id", "cathode", "cycle", "energy", "percent deviation"]
 
 # Sets Dash application parameters
 app = dash.Dash("Charge_Tracker",
@@ -48,6 +49,7 @@ app.layout = html.Div([html.Div([dcc.Graph(id="capacity_tracker",
                                               placeholder="Select cycle (first: 0)",
                                               value="0"),
                                  dte.DataTable(rows=[{}],
+                                               columns = table_order,
                                                selected_row_indices=[],
                                                id="group_detail")])],
                       style={"width": "100%",
@@ -201,7 +203,6 @@ def update_table(group_name, cycle_number, max_rows=50):
     stdev = df["energy"].std()
     df["percent deviation"] = abs(df["energy"] - mean) * 100.0 / (2.0 * stdev)
     df.sort_values(by="percent deviation", ascending=False)
-    df = df[["id", "cathode", "cycle", "energy", "percent deviation"]]
 
     return df.to_dict("records")
 
