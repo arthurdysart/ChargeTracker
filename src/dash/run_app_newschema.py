@@ -7,10 +7,11 @@ sudo python run_app_newschema.py
 """
 
 # IMPORTED LIBRARIES
+from cassandra.cluster import Cluster
 from dash.dependencies import Input
 from dash.dependencies import Output
-from cassandra.cluster import Cluster
 from itertools import chain as flat
+from textwrap import dedent as ded
 
 import dash
 import dash_core_components as dcc
@@ -23,17 +24,24 @@ import plotly.graph_objs as go
 # Sets Cassandra database parameters
 db_session = Cluster(["10.0.0.74"]).connect()
 
-# Sets dropdown options
+# Sets Table and dropdown options
 groups = ["W", "X", "Y", "Z"]
 cycles = [str(x) for x in range(1000)]
 table_order = ["id", "cathode", "cycle", "energy", "percent deviation"]
 
 # Sets Dash application parameters
 app = dash.Dash("Charge_Tracker",
-                external_stylesheets=["https://codepen.io/chriddyp/pen/bWLwgP.css"])
+                external_stylesheets=[\
+                        "https://codepen.io/chriddyp/pen/bWLwgP.css"])
 server = app.server
 app.layout = html.Div([
         html.Div([
+                dcc.Markdown(ded("""
+                **Battery summary: near real time**
+
+                For each battery group, displays average value (curves) and
+                standard deviation (shaded area).
+                """)),
                 dcc.Graph(
                         id="capacity_tracker",
                         figure="figure"),
@@ -48,6 +56,14 @@ app.layout = html.Div([
                         "padding-bottom": "50px"}
                 ),
         html.Div([
+                dcc.Markdown(ded("""
+                **Group deep drive**
+
+                For given battery group and number of (dis)charges, find
+                constituent batteries that are either representatives or
+                outliers. Note: percent deviation of 100 % indicates value
+                2 standard deviations away from the group's mean.
+                """)),
                 html.Div(
                         dcc.Dropdown(
                             id="table_groups",
@@ -76,11 +92,8 @@ app.layout = html.Div([
                 )
         ],
         style={
-                "align": "center",
-                "width": "90%",
-                "height": "auto",
-                "display": "inline-block",
-                "margin": "0 auto"}
+                "width": "99%",
+                "height": "auto",}
         )
 
 ## FUNCTION DEFINITIONS
