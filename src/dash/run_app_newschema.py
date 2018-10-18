@@ -121,10 +121,10 @@ def update_capacity_graph(interval):
     df = analyze_all_groups()
 
     # Initializes color schemes and gets all cathode names
-    colors = {"W": ("rgb(230,41,55)", "rgba(230,41,55,0.2)"),
-              "X": ("rgb(255,117,37)", "rgba(255,117,37,0.2)"),
-              "Y": ("rgb(0,169,255)", "rgba(0,169,255,0.2)"),
-              "Z": ("rgb(135,60,190)", "rgba(135,60,190,0.2)"),}
+    colors = {"W": ("rgb(230,41,55)", "rgba(230,41,55,0.1)"),
+              "X": ("rgb(255,117,37)", "rgba(255,117,37,0.1)"),
+              "Y": ("rgb(0,169,255)", "rgba(0,169,255,0.1)"),
+              "Z": ("rgb(135,60,190)", "rgba(135,60,190,0.1)"),}
     cathodes = df.cathode.unique()
 
     # Creates all scatter data for real-time graph
