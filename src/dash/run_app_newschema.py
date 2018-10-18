@@ -85,7 +85,7 @@ def make_trace(df, c, colors):
                    df_sub["cathode"].tolist(),
                    df_sub["count"].tolist(),
                    df_sub["cycle"].tolist(),)
-    mouseover_text = ["Average: {:.3f} Ah &#177; {:.1f} %"
+    mouseover_text = ["Average: {:.3f} Ah &#177; {:.1f} %<br>"
                       "Chemistry: {}<br>"
                       "Batteries: {}<br>"
                       "Cycle: {} discharge<br>"\
@@ -188,10 +188,10 @@ def update_battery_table(interval):
     df = analyze_one_group()
 
     # Initializes color schemes and gets all cathode names
-    colors = {"W": ("rgb(0,100,80)", "rgba(0,100,80,0.1)"),
-              "X": ("rgb(0,100,80)", "rgba(0,100,80,0.1)"),
-              "Y": ("rgb(0,176,246)", "rgba(0,176,246,0.2)"),
-              "Z": ("rgb(231,107,243)", "rgba(231,107,243,0.2)"),}
+    colors = {"W": ("rgb(230,41,55)", "rgba(230,41,55,0.2)"),
+              "X": ("rgb(255,117,37)", "rgba(255,117,37,0.2)"),
+              "Y": ("rgb(0,169,255)", "rgba(0,169,255,0.2)"),
+              "Z": ("rgb(135,60,190)", "rgba(135,60,190,0.2)"),}
     cathodes = df.cathode.unique()
 
     # Creates all scatter data for real-time graph
