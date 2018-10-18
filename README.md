@@ -16,13 +16,11 @@ ChargeTracker addresses the battery community's need for automated electrochemic
 
 ChargeTracker's MapReduce tasks transform raw sensor measurements (i.e., voltage, current, and time) into meaningful battery metrics (total energy and capacity). Analyzed battery data is grouped according to specified metadata (e.g., cathode material X, Y, or Z) and displayed on the [live GUI dashboard](http://mybatteries.live), refreshed every 30 seconds:
 
-**TODO: SHOW GRAPH IN ACTION**
+![Near real-time visual shows repeatability and average of battery groups](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/charge_tracker_graph.png)
 
 Below the dashboard, constituent batteries for each group are tabulated and ordered by standard deviation. Outliers are identified by excessive standard deviation from the mean performance value:
 
-**TODO: SHOW TABLE IN ACTION**
-
-ChargeTracker version 1.0 is built on Python 2.7 and processes ca. 2,500 messages per second.
+![Group deep dive shows which batteries are potential outliers](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/charge_tracker_table.png)
 
 ## Engineering Design
 ChargeTracker is a streaming analysis pipeline built with open-source technologies:
@@ -42,6 +40,8 @@ Each battery publishes its raw measurements to [Kafka](https://kafka.apache.org/
 To optimize data input, the Kafka topic is organized into 6 partitions. All 3 Spark Streaming workers consume raw measurement data from 2 unique partitions, and execute MapReduce tasks to calculate battery metrics. The Cassandra database is distributed across an odd number of nodes to enable majority voting, in the case of network downtime, as part of the gossip protcol:
 
 ![Node distribution is optimized for parallel tasks](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/cluster_design.png)
+
+ChargeTracker version 1.0 is built on Python 2.7 and processes ca. 2,500 messages per second.
 
 ## Quick Start
 ChargeTracker is executed on a multi-node cluster. Deployment via [Insight Pegasus](https://github.com/InsightDataScience/pegasus) on [AWS Cloud EC2](https://aws.amazon.com/ec2/) is recommended. The project documentation includes detailed instructions for [cluster setup](doc/cluster_setup.md) and [manual installation](doc/manual_install.md).
