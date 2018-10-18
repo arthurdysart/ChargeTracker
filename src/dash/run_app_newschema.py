@@ -75,15 +75,15 @@ def analyze_all_groups():
                              SELECT
                              cathode,
                              cycle,
-                             double_sum(value) AS value
+                             double_sum(value) AS metric
                              FROM battery_metrics.discharge_energy;
                              """)
 
     # Calculates aggreates (mean, std dev, count, error, upper/lower limits)
     pg = df_all.groupby(["cathode", "cycle"])
-    df = pd.DataFrame({"mean": pg["value"].mean(),
-                       "stdev": pg["value"].std(),
-                       "count": pg["value"].count(),}).reset_index()
+    df = pd.DataFrame({"mean": pg["metric"].mean(),
+                       "stdev": pg["metric"].std(),
+                       "count": pg["metric"].count(),}).reset_index()
     df["error"] = df["stdev"] * 100.0 / df["mean"]
     return df
 
@@ -202,13 +202,14 @@ def update_table(group_name, cycle_number, max_rows=50):
                          WHERE cathode=\'{}\' AND cycle={};
                          """.format(group_name, cycle_number))
 
-    # Calculates aggreates (mean, std dev, count, error, upper/lower limits)
+    # Calculates aggreates (mean, std dev, and percent deviation)
     mean = df["metric"].mean()
-    stdev = df["metric"].std()
-    
-    df["Percent deviation"] = abs(df["metric"] - mean) * 100.0 / stdev
+    stdev = df["metric"].std()    
+    df["Percent deviation"] = abs(df["metric"] - mean) * 100.0 / (2.0 * stdev)
+    df.sort_values(by="Percent deviation", ascending=False)
+    df = df[["id", "cathode", "cycle", "Percent deviation"]]
 
-    return df.to_dict('records')
+    return df.to_dict("records")
 
 
 ## MAIN MODULE
