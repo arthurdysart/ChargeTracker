@@ -245,8 +245,6 @@ def update_table(group_name, cycle_number, max_rows=50):
                          WHERE cathode=\'{}\' AND cycle={};
                          """.format(group_name, cycle_number))
 
-    print(df)
-
     # Calculates aggreates (mean, std dev, and percent deviation)
     mean = df["energy"].mean()
     stdev = df["energy"].std()
