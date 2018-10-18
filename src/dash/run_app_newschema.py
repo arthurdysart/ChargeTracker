@@ -75,9 +75,10 @@ app.layout = html.Div([
                 )
         ],
         style={
+                "align": "center",
                 "width": "90%",
                 "height": "auto",
-                "align": "center"}
+                "display": "inline-block"}
         )
 
 ## FUNCTION DEFINITIONS
