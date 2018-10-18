@@ -57,9 +57,17 @@ def stdin(sys_argv):
     except:
         raise OSError("Cannot import models. Check path for models file.")
 
-    # Generates cathode and initial capacity randomly
+    # Generates cathode and initial capacity pseudo-randomly
     p["cathode"] = nprnd.choice(["W", "X", "Y", "Z",])
-    p["capacity"] = nprnd.choice(range(2000, 10001))
+
+    if p["cathode"] == "W":
+        p["capacity"] = nprnd.choice(range(5000, 6001))    
+    elif p["cathode"] == "X":
+        p["capacity"] = nprnd.choice(range(9000, 12001))
+    elif p["cathode"] == "Y":
+        p["capacity"] = nprnd.choice(range(5000, 8001))
+    else:
+        p["capacity"] = nprnd.choice(range(2000, 6501))
     return p
 
 def create_entry(date_time, n, step, voltage, voltage_prev, max_time, p):
