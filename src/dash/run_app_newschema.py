@@ -202,7 +202,7 @@ def update_battery_table(interval):
 
     # Sets layout 
     layout = go.Layout(hovermode = "closest",
-                       legend = {'x': 0, 'y': 1, orientation'h"},
+                       legend = {'x': 0, 'y': 1, "orientation": "h"},
                        margin = {'l': 40, 'b': 40, 't': 10, 'r': 10},
                        #paper_bgcolor = "rgb(255,255,255)",
                        #plot_bgcolor = "rgb(229,229,229)",
