@@ -96,7 +96,7 @@ app.layout = html.Div([
                         "width": "100%",
                         "height": "auto",
                         "display": "scatter",
-                        "padding-bottom": "50px"}
+                        "padding-bottom": "100px"}
                 )
         ],
         style={
