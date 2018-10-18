@@ -204,6 +204,9 @@ def update_table(group_name, cycle_number, max_rows=50):
     df["percent deviation"] = abs(df["energy"] - mean) * 100.0 / (2.0 * stdev)
     df.sort_values(by="percent deviation", ascending=False)
 
+    for n in ("energy", "percent deviation"):
+        df[n] = df[n].map(lambda x: '{0:.1f}'.format(x))
+
     return df.to_dict("records")
 
 
