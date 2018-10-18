@@ -186,20 +186,22 @@ def update_table(group_name, cycle_number, max_rows=50):
     # Pulls all data from Cassandra into Pandas dataframe
     df = query_cassandra("""
                          SELECT
-                         id AS ID,
-                         cathode AS Cathode,
-                         cycle AS Cycle,
-                         double_sum(value) AS Energy
+                         id AS id,
+                         cathode AS cathode,
+                         cycle AS cycle,
+                         double_sum(value) AS energy
                          FROM battery_metrics.discharge_energy
                          WHERE cathode=\'{}\' AND cycle={};
                          """.format(group_name, cycle_number))
 
+    print(df)
+
     # Calculates aggreates (mean, std dev, and percent deviation)
-    mean = df["Energy"].mean()
-    stdev = df["Energy"].std()
-    df["Percent deviation"] = abs(df["Energy"] - mean) * 100.0 / (2.0 * stdev)
-    df.sort_values(by="Percent deviation", ascending=False)
-    df = df[["ID", "Cathode", "Cycle", "Energy", "Percent deviation"]]
+    mean = df["energy"].mean()
+    stdev = df["energy"].std()
+    df["percent deviation"] = abs(df["energy"] - mean) * 100.0 / (2.0 * stdev)
+    df.sort_values(by="percent deviation", ascending=False)
+    df = df[["id", "cathode", "cycle", "energy", "percent deviation"]]
 
     return df.to_dict("records")
 
