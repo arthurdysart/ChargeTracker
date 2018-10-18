@@ -61,7 +61,9 @@ app.layout = html.Div([
 
                 For given battery group and number of (dis)charges, find
                 constituent batteries that are either representatives or
-                outliers. Note: percent deviation of 100 % indicates value
+                outliers.
+                
+                Note: 100 % percent deviation indicates value is
                 2 standard deviations away from the group's mean.
                 """)),
                 html.Div(
