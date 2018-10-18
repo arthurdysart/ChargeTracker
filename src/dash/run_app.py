@@ -3,7 +3,7 @@ Displays summary visual showing aggreagated battery data using Dash library.
 Graph 
 
 Template:
-sudo python run_app_newschema.py
+sudo python run_app.py
 """
 
 # IMPORTED LIBRARIES
@@ -17,12 +17,19 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table_experiments as dte
+import decouple as dc
+import os
 import pandas as pd
 import plotly.graph_objs as go
 
 ## GLOBAL DEFINITIONS 
 # Sets Cassandra database parameters
-db_session = Cluster(["10.0.0.74"]).connect()
+path_home = os.getcwd()
+os.chdir(r"../../util/settings")
+settings = dc.Config(dc.RepositoryEnv(".env"))
+os.chdir(path_home)
+p_cassandra = settings.get("CASSANDRA_MASTER", cast=dc.Csv())
+db_session = Cluster(p_cassandra).connect()
 
 # Sets Table and dropdown options
 all_groups = ["W", "X", "Y", "Z"]
@@ -264,7 +271,7 @@ if __name__ == "__main__":
     db_session.default_fetch_size = None
 
     # Starts Flask/Dash app
-    app.run_server(debug=True, host="0.0.0.0", port=80)
+    app.run_server(debug=False, host="0.0.0.0", port=80)
 
 
 ## END OF FILE

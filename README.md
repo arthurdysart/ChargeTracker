@@ -27,17 +27,17 @@ ChargeTracker is a streaming analysis pipeline built with open-source technologi
 
 ![ChargeTracker shows near real-time metrics derived from raw sensor measurements](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/pipeline.png)
 
-Each battery publishes its raw measurements to [Kafka](https://kafka.apache.org/) (1 topic, 6 partitions). These raw measurements are consumed by [Spark Streaming](https://spark.apache.org/streaming/) and transformed into meaningful metrics via RDD-MapReduce tasks. Resulting metrics are stored in the [Cassandra](http://cassandra.apache.org/) database according to partition keys `chemistry` and `test_type` and clustering key `cycle`. The [Plotly Dash](https://dash.plot.ly/introduction) service queries the database and refreshes the interactive GUI dashboard every 30 seconds. On the control node, [Insight Pegasus](https://github.com/InsightDataScience/pegasus) (not shown) manages all cluster nodes. To optimize throughput, cluster nodes are allocated to services as follows:
+Each battery publishes its raw measurements to [Kafka](https://kafka.apache.org/) (1 topic, 3 partitions). These raw measurements are consumed by [Spark Streaming](https://spark.apache.org/streaming/) and transformed into meaningful metrics via RDD-MapReduce tasks. Resulting metrics are stored in the [Cassandra](http://cassandra.apache.org/) database according to partition keys `chemistry` and `test_type` and clustering key `cycle`. The [Plotly Dash](https://dash.plot.ly/introduction) service queries the database and refreshes the interactive GUI dashboard every 30 seconds. On the control node, [Insight Pegasus](https://github.com/InsightDataScience/pegasus) (not shown) manages all cluster nodes. To optimize throughput, cluster nodes are allocated to services as follows:
 
 | Technology             | Nodes | Purpose                                                                          |
 |------------------------|-------|----------------------------------------------------------------------------------|
-| Apache Kafka           |   4   | Ingests raw measurements into 1 Kafka topic across 6 partitions (4 brokers)      |
+| Apache Kafka           |   4   | Ingests raw measurements into 1 Kafka topic across 3 partitions (4 brokers)      |
 | Apache Spark Streaming |   4   | Transforms raw measurements into battery metrics (1 driver, 3 workers)           |
 | Apache Cassandra       |   3   | Partitions analyzed metrics by battery group, clusters by number of (dis)charges |
 | Plotly Dash            |   1   | Displays aggregate battery metrics in near real-time GUI                         |
 | Insight Pegasus        |   1   | Automates deployment of AWS EC2 instances (1 control node)                       |
 
-To optimize data input, the Kafka topic is organized into 6 partitions. All 3 Spark Streaming workers consume raw measurement data from 2 unique partitions, and execute MapReduce tasks to calculate battery metrics. The Cassandra database is distributed across an odd number of nodes to enable majority voting, in the case of network downtime, as part of the gossip protcol:
+To optimize data input, the Kafka topic is organized into 3 partitions. All 3 Spark Streaming workers consume raw measurement data from 2 unique partitions, and execute MapReduce tasks to calculate battery metrics. The Cassandra database is distributed across an odd number of nodes to enable majority voting, in the case of network downtime, as part of the gossip protcol:
 
 ![Node distribution is optimized for parallel tasks](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/cluster_design.png)
 

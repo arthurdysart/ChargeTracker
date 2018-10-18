@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Sep 29 23:32:35 2018
-
-@author: arthur
+Confirms the accuracy of SciPy interpolate model as unserialized or "unpickled" python object.
 """
 
 

@@ -7,7 +7,7 @@
 # Template:
 # bash multiple_batteries.sh <TMUX-session-name> <number-batteries> <number-cycles> <current> <low_voltage_limit> <high_voltage_limit>
 # Example:
-# bash multiple_batteries.sh two_batteries 2 10 1200 2.0 4.5
+# bash multiple_batteries.sh twentyfive_batteries 25 100 1200 2.0 4.5
 
 # Imports simulation parameters from standard input
 TMUX_SESSION_NAME=$1

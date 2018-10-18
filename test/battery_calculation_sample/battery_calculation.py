@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 """
 Calculates capacity, energy, and power values for sample battery data.
 

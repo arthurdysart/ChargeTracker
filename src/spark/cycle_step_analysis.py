@@ -2,9 +2,10 @@
 from __future__ import print_function
 """
 Transforms RDDs from Kafka direct stream (DStream) into capacity, energy, and
-power values for given CQL command batch size. Data is reduced by aggregate or
-primary key: <(0) battery-id, (1) group, (2) cycle, (3) step>. Separate
-database tables are created for capacity, energy, and power.
+power values for given CQL command batch size. Data is reduced by grouping via
+primary key: <(0) battery-id, (1) group, (2) cycle>. Separate
+database tables are created for capacity and energy. Power calculations setup
+but not sent to database.
 
 To use, call from script "spark_submit.sh".
 """

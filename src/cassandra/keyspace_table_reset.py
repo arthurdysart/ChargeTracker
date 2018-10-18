@@ -40,12 +40,6 @@ def stdin(sys_argv):
         raise ValueError("Cannot interpret parameters. Check input.")
     return table_names, p
 
-def setup_connection(p):
-    """
-    Initializes Cassandra CQL session and batch CQL statement executor.
-    """
-    return 
-
 def reset_keyspace(keyspace_name, db_cass):
     """
     Creates and executes CQL commands for Cassandra keyspace and UDFs.

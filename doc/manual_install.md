@@ -39,8 +39,8 @@ sudo cp $NEW_SETTINGS $OLD_SETTINGS
 KAFKA_START=$KAFKA_HOME/bin/kafka-server-start.sh
 sudo $KAFKA_START $OLD_SETTINGS &
 
-# Creates Kafka message topic with 6 partitions and 3 replicas
-bash topic_reset.sh "battery_data" "6" "3"
+# Creates Kafka message topic with 3 partitions and 3 replicas
+bash topic_reset.sh "battery_data" "3" "3"
 ```
 
 From the Spark driver node, initiate the Spark Streaming service (calculates battery metrics):
