@@ -61,13 +61,13 @@ def stdin(sys_argv):
     p["cathode"] = nprnd.choice(["W", "X", "Y", "Z",])
 
     if p["cathode"] == "W":
-        p["capacity"] = nprnd.choice(range(5000, 6001))    
+        p["capacity"] = nprnd.choice(range(5000, 6001))
     elif p["cathode"] == "X":
-        p["capacity"] = nprnd.choice(range(9000, 12001))
+        p["capacity"] = nprnd.choice(range(9500, 12001))
     elif p["cathode"] == "Y":
-        p["capacity"] = nprnd.choice(range(5000, 8001))
+        p["capacity"] = nprnd.choice(range(2000, 8001))
     else:
-        p["capacity"] = nprnd.choice(range(2000, 6501))
+        p["capacity"] = nprnd.choice(range(4500, 9001))
     return p
 
 def create_entry(date_time, n, step, voltage, voltage_prev, max_time, p):

@@ -106,11 +106,11 @@ def reset_table(table_name, db_cass, keyspace_name="battery_metrics"):
                        CREATE TABLE IF NOT EXISTS {}.{} (
                        """.format(keyspace_name, table_name) + \
                        """
-                       cathode text,
+                       group text,
                        cycle int,
                        id text,
                        metric list<double>,
-                       PRIMARY KEY((cathode, cycle), id))
+                       PRIMARY KEY((group, cycle), id))
                        WITH CLUSTERING ORDER BY
                        (id ASC);
                        """)

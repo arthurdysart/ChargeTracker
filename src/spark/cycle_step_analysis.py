@@ -3,7 +3,7 @@ from __future__ import print_function
 """
 Transforms RDDs from Kafka direct stream (DStream) into capacity, energy, and
 power values for given CQL command batch size. Data is reduced by aggregate or
-primary key: <(0) battery-id, (1) cathode, (2) cycle, (3) step>. Separate
+primary key: <(0) battery-id, (1) group, (2) cycle, (3) step>. Separate
 database tables are created for capacity, energy, and power.
 
 To use, call from script "spark_submit.sh".
@@ -64,7 +64,7 @@ def summarize_step_data(kafka_stream):
         tuple(x.strip() for x in ln[1].strip().split(",")))
 
     # Transforms parsed entries into key-value pair
-    # SCHEMA: (<battery id: str>, <cathode: str>, <cycle: int>, <step: str>) :
+    # SCHEMA: (<battery id: str>, <group: str>, <cycle: int>, <step: str>) :
     #         (<date-time: str>, <voltage: float>, <current: float>,
     #          <prev_voltage: float>, <step_time: float>)
     paired_rdd = parsed_rdd.map(lambda x: \
@@ -93,7 +93,7 @@ def summarize_step_data(kafka_stream):
          i[3] + j[3],))
 
     # Re-organizes key and value contents for Cassandra CQL interpolation
-    # SCHEMA: <step: str>, <cathode: str>, <cycle: int>, <battery id: str>,
+    # SCHEMA: <step: str>, <group: str>, <cycle: int>, <battery id: str>,
     #         <total capacity: float>, <total energy: float>,
     #         <power sum: float>, <counts: float>,
     summary_rdd = total_rdd.map(lambda x: \
@@ -128,7 +128,7 @@ def send_partition(entries, table_name, crit_size=500):
     cql_command = db_session.prepare("""
                                      UPDATE {} SET
                                      metric =  ? + metric
-                                     WHERE cathode = ?
+                                     WHERE group = ?
                                      AND cycle = ?
                                      AND id = ?;
                                      """.format(table_name))
@@ -192,7 +192,7 @@ if __name__ == "__main__":
                                           kafka_params)
 
     # For each micro-RDD, transforms measurements to summary/overall values
-    # SCHEMA: (<cathode: str>, <cycle: int>,
+    # SCHEMA: (<group: str>, <cycle: int>,
     #          <battery id: str>, <capacity sum: dbl>, <energy sum: dbl>,
     #          <power sum: dbl>, <counts: int>)
     discharge_rdd, charge_rdd = summarize_step_data(kafka_stream)
