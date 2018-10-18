@@ -12,9 +12,9 @@ from dash.dependencies import Output
 from cassandra.cluster import Cluster
 from itertools import chain as flat
 
-import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table_experiments as dte
 import pandas as pd
 import plotly.graph_objs as go
 
@@ -22,19 +22,35 @@ import plotly.graph_objs as go
 # Sets Cassandra database parameters
 db_session = Cluster(["10.0.0.74"]).connect()
 
+# Sets dropdown options
+groups = ["W", "X", "Y", "Z"]
+cycles = [str(x) for x in range(1000)]
+
 # Sets Dash application parameters
 app = dash.Dash("Charge_Tracker",
                 external_stylesheets=["https://codepen.io/chriddyp/pen/bWLwgP.css"])
 server = app.server
-app.layout = html.Div([html.Div([dcc.Graph(id="capacity_tracker",
-                                           figure="figure"),],
-                                style={"width": "100%",
-                                       "height": "auto",
-                                       "display": "scatter"}),
-                                dcc.Interval(id="real_time_updates",
+app.layout = html.Div([html.Div([dcc.Interval(id="real_time_updates",
                                              interval=10000,
-                                             n_intervals=0),])
-    
+                                             n_intervals=0),],
+                                 dcc.Graph(id="capacity_tracker",
+                                           figure="figure"),
+                                 style={"width": "100%",
+                                        "height": "auto",
+                                        "display": "scatter"},),
+                       html.Div([dcc.Dropdown(id="table_groups",
+                                              options=[{x: x} for x in groups],
+                                              value="Select battery group"),
+                                 dcc.Dropdown(id="table_cycles",
+                                              options=[{x: x} for x in cycles],
+                                              value="Select battery group"),
+                                 dte.DataTable(rows=[{}],
+                                               row_selectable=True,
+                                               filterable=True,
+                                               sortable=True,
+                                               selected_row_indices=[],
+                                               id="group_detail")]))
+
 ## FUNCTION DEFINITIONS
 def create_dataframe(colnames, rows):
     """
@@ -57,7 +73,6 @@ def analyze_all_groups():
                              SELECT
                              cathode,
                              cycle,
-                             id,
                              double_sum(value) AS value
                              FROM battery_metrics.discharge_energy;
                              """)
@@ -116,7 +131,7 @@ def make_trace(df, c, colors):
 # Callback updates graph (OUTPUT) according to time interval (INPUT)
 @app.callback(Output("capacity_tracker", "figure"),
               [Input("real_time_updates", "n_intervals")])
-def update_capacity_graph(interval):
+def update_graph(interval):
     """
     Queries table, analyzes data, and assembles results in Dash format.
     """
@@ -147,7 +162,7 @@ def update_capacity_graph(interval):
                                 "tickcolor": "rgb(127,127,127)",
                                 "ticks": "outside",
                                 "zeroline": False},
-                       yaxis = {"title": "Measured capacity  (Ah)",
+                       yaxis = {"title": "Calculated energy  (Wh)",
                                 "gridcolor": "rgb(255,255,255)",
                                 "showgrid": True,
                                 "showline": False,
@@ -158,84 +173,46 @@ def update_capacity_graph(interval):
 
     return go.Figure(data = data, layout = layout)
 
-def analyze_one_group():
+def analyze_one_group(group_name, cycle_number):
     """
     Aggregates battery data for selected battery group.
     """
     # Pulls all data from Cassandra into Pandas dataframe
-    # TODO: Fix table schema?
     df_all = query_cassandra("""
-                             SELECT step, id, cathode, cycle,
-                             double_sum(capacity) AS sum_val
-                             FROM battery_data WHERE step = 'D'
-                             ALLOW FILTERING;
-                             """)
+                             SELECT
+                             cathode,
+                             cycle,
+                             id,
+                             double_sum(value) AS value
+                             FROM battery_metrics.discharge_energy
+                             WHERE cathode=\'{}\' AND cycle={};
+                             """.format(group_name, cycle_number))
 
     # Calculates aggreates (mean, std dev, count, error, upper/lower limits)
-    pg = df_all.groupby(["cathode", "cycle", "step"])
-    df = pd.DataFrame({"mean": pg["sum_val"].mean(),
-                       "stdev": pg["sum_val"].std(),
-                       "count": pg["sum_val"].count(),}).reset_index()
+    pg = df_all.groupby(["cathode", "cycle"])
+    df = pd.DataFrame({"mean": pg["value"].mean(),
+                       "stdev": pg["value"].std(),
+                       "count": pg["value"].count(),}).reset_index()
     df["error"] = df["stdev"] * 100.0 / df["mean"]
+    df.sort_values(by='stdev', ascending=False)
 
     return df
 
 # Callback updates graph (OUTPUT) according to time interval (INPUT)
-#@app.callback(Output("capacity_tracker", "figure"),
-#              [Input("real_time_updates", "n_intervals")])
-def update_battery_table(interval):
+@app.callback(Output('group_detail', 'rows'),
+              [Input('table_groups', 'value'),
+               Input('table_cycles', 'value')])
+def update_table(group_name, cycle_number, max_rows=25):
     """
     Queries table, analyzes data, and assembles results in Dash format.
     """
-    df = analyze_one_group()
+    df = analyze_one_group(group_name, cycle_number)
 
-    # Initializes color schemes and gets all cathode names
-    colors = {"W": ("rgb(230,41,55)", "rgba(230,41,55,0.2)"),
-              "X": ("rgb(255,117,37)", "rgba(255,117,37,0.2)"),
-              "Y": ("rgb(0,169,255)", "rgba(0,169,255,0.2)"),
-              "Z": ("rgb(135,60,190)", "rgba(135,60,190,0.2)"),}
-    cathodes = df.cathode.unique()
+    table = html.Table([html.Tr([html.Th(col) for col in df.columns])] + \
+        [html.Tr([html.Td(df.iloc[i][col]) for col in df.columns]) \
+         for i in range(min(len(df), max_rows))])
 
-    # Creates all scatter data for real-time graph
-    data = [make_trace(df, c, colors) for c in cathodes]
-    data = list(flat.from_iterable(data))
-
-    # Sets layout 
-    layout = go.Layout(hovermode = "closest",
-                       legend = {'x': 0, 'y': 1, "orientation": "h"},
-                       margin = {'l': 40, 'b': 40, 't': 10, 'r': 10},
-                       #paper_bgcolor = "rgb(255,255,255)",
-                       #plot_bgcolor = "rgb(229,229,229)",
-                       xaxis = {"title": "Number of discharges",
-                                "gridcolor": "rgb(255,255,255)",
-                                "showgrid": True,
-                                "showline": False,
-                                "showticklabels": True,
-                                "tickcolor": "rgb(127,127,127)",
-                                "ticks": "outside",
-                                "zeroline": False},
-                       yaxis = {"title": "Measured capacity  (Ah)",
-                                "gridcolor": "rgb(255,255,255)",
-                                "showgrid": True,
-                                "showline": False,
-                                "showticklabels": True,
-                                "tickcolor": "rgb(127,127,127)",
-                                "ticks": "outside",
-                                "zeroline": False},)
-
-    return go.Figure(data = data, layout = layout)
-
-def generate_table(max_rows=15):
-    """
-    Creates HTML table sorted by decreasing std dev.
-    """
-    #df = query_analyze_cassandra()
-    
-    row_header = [html.Tr([html.Th(c) for c in df.columns])]
-    row_data = [html.Tr([html.Td(df.iloc[i][c]) for c in df.columns]) for i in range(min(len(df), max_rows))]
-
-    return html.Table(row_header + row_data)
-
+    return table
 
 
 ## MAIN MODULE
