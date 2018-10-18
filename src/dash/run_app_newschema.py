@@ -37,9 +37,9 @@ server = app.server
 app.layout = html.Div([
         html.Div([
                 dcc.Markdown(ded("""
-                **Battery summary: near real time**
+                **Charge Tracker: near real time battery monitoring**
 
-                For each battery group, displays average value (curves) and
+                For each battery group, displays average energy (lines) and
                 standard deviation (shaded area).
                 """)),
                 dcc.Graph(
@@ -53,13 +53,13 @@ app.layout = html.Div([
                         "width": "100%",
                         "height": "auto",
                         "display": "scatter",
-                        "padding-bottom": "50px"}
+                        "padding-bottom": "75px"}
                 ),
         html.Div([
                 dcc.Markdown(ded("""
                 **Group deep drive**
 
-                For given group and number of (dis)charges, identify
+                For given group and number of discharge cycles, identify
                 whether batteries are representatives or outliers.
                 
                 Note: 100 % percent deviation indicates value is
@@ -79,7 +79,7 @@ app.layout = html.Div([
                         dcc.Dropdown(
                             id="table_cycles",
                             options=[{"label": x, "value": x} for x in cycles],
-                            placeholder="Select iteration number...",
+                            placeholder="Select cycle number...",
                             value=""),
                         style={
                                 "width": "48%",
@@ -96,7 +96,7 @@ app.layout = html.Div([
                         "width": "100%",
                         "height": "auto",
                         "display": "scatter",
-                        "padding-bottom": "100px"}
+                        "padding-bottom": "125px"}
                 )
         ],
         style={
@@ -237,9 +237,9 @@ def update_table(group_name, cycle_number, max_rows=50):
     # Pulls all data from Cassandra into Pandas dataframe
     df = query_cassandra("""
                          SELECT
-                         id AS id,
-                         cathode AS cathode,
-                         cycle AS cycle,
+                         id,
+                         cathode,
+                         cycle,
                          double_sum(value) AS energy
                          FROM battery_metrics.discharge_energy
                          WHERE cathode=\'{}\' AND cycle={};
