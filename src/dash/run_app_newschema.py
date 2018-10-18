@@ -44,7 +44,8 @@ app.layout = html.Div([
                 style={
                         "width": "100%",
                         "height": "auto",
-                        "display": "scatter"}
+                        "display": "scatter"
+                        "padding-bottom": "50px"}
                 ),
         html.Div([
                 html.Div(
