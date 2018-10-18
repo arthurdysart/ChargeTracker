@@ -59,9 +59,8 @@ app.layout = html.Div([
                 dcc.Markdown(ded("""
                 **Group deep drive**
 
-                For given battery group and number of (dis)charges, find
-                constituent batteries that are either representatives or
-                outliers.
+                For given group and number of (dis)charges, identify
+                whether batteries are representatives or outliers.
                 
                 Note: 100 % percent deviation indicates value is
                 2 standard deviations away from the group's mean.
@@ -90,7 +89,14 @@ app.layout = html.Div([
                 dte.DataTable(
                         rows=[{}],
                         columns = table_order,
-                        id="group_detail")]
+                        id="group_detail")],
+                        
+                        
+                style={
+                        "width": "100%",
+                        "height": "auto",
+                        "display": "scatter",
+                        "padding-bottom": "50px"}
                 )
         ],
         style={
