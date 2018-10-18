@@ -12,6 +12,7 @@ from dash.dependencies import Output
 from cassandra.cluster import Cluster
 from itertools import chain as flat
 
+import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table_experiments as dte
@@ -32,12 +33,12 @@ app = dash.Dash("Charge_Tracker",
 server = app.server
 app.layout = html.Div([html.Div([dcc.Interval(id="real_time_updates",
                                              interval=10000,
-                                             n_intervals=0),],
+                                             n_intervals=0)],
                                  dcc.Graph(id="capacity_tracker",
                                            figure="figure"),
                                  style={"width": "100%",
                                         "height": "auto",
-                                        "display": "scatter"},),
+                                        "display": "scatter"}),
                        html.Div([dcc.Dropdown(id="table_groups",
                                               options=[{x: x} for x in groups],
                                               value="Select battery group"),
@@ -49,7 +50,9 @@ app.layout = html.Div([html.Div([dcc.Interval(id="real_time_updates",
                                                filterable=True,
                                                sortable=True,
                                                selected_row_indices=[],
-                                               id="group_detail")]))
+                                               id="group_detail")])],
+                      style={"width": "100%",
+                             "height": "auto"})
 
 ## FUNCTION DEFINITIONS
 def create_dataframe(colnames, rows):
