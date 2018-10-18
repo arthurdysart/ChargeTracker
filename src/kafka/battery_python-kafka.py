@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 """
 Publishes simulated battery cycling data to created kafka producer.
 
 Template:
-python battery_python-kafka.py <id> <cycles> <current> <low_voltage_limit> <high_voltage_limit>
+python battery_python-kafka.py <seed> <cycles> <current> <low_voltage_limit> <high_voltage_limit>
 
 Example:
 python battery_python-kafka.py 1 1000 200 2.0 4.5
@@ -18,6 +17,7 @@ import numpy.random as nprnd
 import os
 import pickle as pk
 import sys
+import uuid as uu
 
 
 ## FUNCTION DEFINITIONS
@@ -38,7 +38,7 @@ def stdin(sys_argv):
     # Imports terminal input for simulation & Kafka settings
     try:
         p = {}
-        p["id"] = int(sys_argv[1])
+        p["id"] = uu.uuid4()
         p["cycles"] = range(abs(int(sys_argv[2])))
         p["current"] = abs(float(sys_argv[3]))
         p["v_min"] = float(sys_argv[4])
@@ -117,9 +117,7 @@ def generate_cycle_data(n, p, kafka_prod):
     Produces line entries for both "C" and "D" steps for given cycle.
     """
     generate_step_data(n, "C", p, kafka_prod)
-    print("Completed cycle {} C ...".format(n))
     generate_step_data(n, "D", p, kafka_prod)
-    print("Completed cycle {} D ...".format(n))
     return 2
 
 ## MAIN MODULE
@@ -133,7 +131,6 @@ if __name__ == "__main__":
 
     # Generates data for each battery cycle, and publishes to Kafka broker
     count = sum(generate_cycle_data(n, p, kafka_prod) for n in p["cycles"])
-    print("Finished processing {} steps.".format(count))
 
 
 # END OF FILE

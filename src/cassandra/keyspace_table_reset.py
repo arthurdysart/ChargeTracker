@@ -108,8 +108,8 @@ def reset_table(table_name, db_cass, keyspace_name="battery_metrics"):
                        """
                        cathode text,
                        cycle int,
-                       id int,
-                       value list<double>,
+                       id text,
+                       metric list<double>,
                        PRIMARY KEY((cathode, cycle), id))
                        WITH CLUSTERING ORDER BY
                        (id ASC);

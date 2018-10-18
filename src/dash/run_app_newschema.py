@@ -126,7 +126,7 @@ def analyze_all_groups():
                              SELECT
                              cathode,
                              cycle,
-                             double_sum(value) AS metric
+                             double_sum(metric) AS metric
                              FROM battery_metrics.discharge_energy;
                              """)
 
@@ -240,7 +240,7 @@ def update_table(group_name, cycle_number, max_rows=50):
                          id,
                          cathode,
                          cycle,
-                         double_sum(value) AS energy
+                         double_sum(metric) AS energy
                          FROM battery_metrics.discharge_energy
                          WHERE cathode=\'{}\' AND cycle={};
                          """.format(group_name, cycle_number))
