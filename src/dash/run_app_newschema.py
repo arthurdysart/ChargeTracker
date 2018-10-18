@@ -32,28 +32,52 @@ table_order = ["id", "cathode", "cycle", "energy", "percent deviation"]
 app = dash.Dash("Charge_Tracker",
                 external_stylesheets=["https://codepen.io/chriddyp/pen/bWLwgP.css"])
 server = app.server
-app.layout = html.Div([html.Div([dcc.Graph(id="capacity_tracker",
-                                           figure="figure"),
-                                 dcc.Interval(id="real_time_updates",
-                                             interval=10000,
-                                             n_intervals=0)],
-                                 style={"width": "100%",
-                                        "height": "auto",
-                                        "display": "scatter"}),
-                       html.Div([dcc.Dropdown(id="table_groups",
-                                              options=[{"label": x, "value": x} for x in groups],
-                                              placeholder="Select battery group",
-                                              value="W"),
-                                 dcc.Dropdown(id="table_cycles",
-                                              options=[{"label": x, "value": x} for x in cycles],
-                                              placeholder="Select cycle (first: 0)",
-                                              value="0"),
-                                 dte.DataTable(rows=[{}],
-                                               columns = table_order,
-                                               selected_row_indices=[],
-                                               id="group_detail")])],
-                      style={"width": "100%",
-                             "height": "auto"})
+app.layout = html.Div([
+        html.Div([
+                dcc.Graph(
+                        id="capacity_tracker",
+                        figure="figure"),
+                dcc.Interval(
+                        id="real_time_updates",
+                        interval=10000,
+                        n_intervals=0)],
+                style={
+                        "width": "100%",
+                        "height": "auto",
+                        "display": "scatter"}
+                ),
+        html.Div([
+                html.Div(
+                        dcc.Dropdown(
+                            id="table_groups",
+                            options=[{"label": x, "value": x} for x in groups],
+                            placeholder="Select battery group",
+                            value="W"),
+                        style={
+                                "width": "48%",
+                                "display": "inline-block"}
+                        ),
+                html.Div(
+                        dcc.Dropdown(
+                            id="table_cycles",
+                            options=[{"label": x, "value": x} for x in groups],
+                            placeholder="Select cycle",
+                            value="0"),
+                        style={
+                                "width": "48%",
+                                "float": "right",
+                                "display": "inline-block"}
+                        ),
+                dte.DataTable(
+                        rows=[{}],
+                        columns = table_order,
+                        id="group_detail")]
+                )
+        ],
+        style={
+                "width": "90%",
+                "height": "auto"}
+        )
 
 ## FUNCTION DEFINITIONS
 def create_dataframe(colnames, rows):
