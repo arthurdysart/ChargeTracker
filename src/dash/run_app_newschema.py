@@ -30,13 +30,12 @@ cycles = [str(x) for x in range(1000)]
 # Sets Dash application parameters
 app = dash.Dash("Charge_Tracker",
                 external_stylesheets=["https://codepen.io/chriddyp/pen/bWLwgP.css"])
-app.config['suppress_callback_exceptions'] = True
 server = app.server
-app.layout = html.Div([html.Div([dcc.Interval(id="real_time_updates",
+app.layout = html.Div([html.Div([dcc.Graph(id="capacity_tracker",
+                                           figure="figure"),
+                                 dcc.Interval(id="real_time_updates",
                                              interval=10000,
                                              n_intervals=0)],
-                                 dcc.Graph(id="capacity_tracker",
-                                           figure="figure"),
                                  style={"width": "100%",
                                         "height": "auto",
                                         "display": "scatter"}),
