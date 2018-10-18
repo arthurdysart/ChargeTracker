@@ -68,7 +68,7 @@ def summarize_step_data(kafka_stream):
     #         (<date-time: str>, <voltage: float>, <current: float>,
     #          <prev_voltage: float>, <step_time: float>)
     paired_rdd = parsed_rdd.map(lambda x: \
-        ((int(x[0]), str(x[1]), int(x[2]), str(x[3]),), \
+        ((str(x[0]), str(x[1]), int(x[2]), str(x[3]),), \
          (str(x[4]), float(x[5]), float(x[6]), float(x[7]), float(x[8]),)))
 
     # Calculates instantaneous capacity, energy, and power for each entry
