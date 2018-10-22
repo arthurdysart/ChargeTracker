@@ -1,0 +1,1 @@
+git tmux python36 python36-debug python36-devel python36-libs python36-pip python36-setuptools python36-test python36-tools python36-virtualenv python-pip

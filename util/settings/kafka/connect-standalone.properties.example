@@ -1,3 +1,12 @@
+# Kafka Connect file sink config file
+# Settings configured for "Charge Tracker" Project by Arthur Dysart.
+# https://github.com/arthurdysart/ChargeTracker 
+#
+# INSTRUCTIONS
+# 1. Upload connect-standalone.properties to correct directory on each cluster node.
+# 3. Start Kafka Connect service from master node.
+#
+# LICENSE
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.

@@ -14,7 +14,7 @@ ChargeTracker monitors battery systems containing over 100 independent battery c
 ## About
 ChargeTracker addresses the battery community's need for automated electrochemical analysis and real-time monitoring. Today, battery analysis is inefficient and tedious: raw sensor measurements must be physically downloaded onto flashdrives, then analyzed with commercial spreadsheet software. ChargeTracker automates this procedure for all tracked batteries, permitting technicians, engineers, and researchers to focus on more significant tasks and worthwhile pursuits. In this context, ChargeTracker is designed to accelerate team producivitity, technologic progress, and scientific discovery.
 
-ChargeTracker's MapReduce tasks transform raw sensor measurements (i.e., voltage, current, and time) into meaningful battery metrics (total energy and capacity). Analyzed battery data is grouped according to specified metadata (e.g., cathode material X, Y, or Z) and displayed on the [live GUI dashboard](http://mybatteries.live), refreshed every 30 seconds:
+ChargeTracker's MapReduce tasks transform raw sensor measurements (i.e., voltage, current, and time) into meaningful battery metrics (measured energy). Analyzed battery data is grouped according to specified metadata (e.g., cathode material W, X, Y, or Z) and displayed on the [live GUI dashboard](http://mybatteries.live), refreshed every 30 seconds:
 
 ![Near real-time visual shows repeatability and average of battery groups](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/charge_tracker_graph.png)
 
@@ -37,11 +37,11 @@ Each battery publishes its raw measurements to [Kafka](https://kafka.apache.org/
 | Plotly Dash            |   1   | Displays aggregate battery metrics in near real-time GUI                         |
 | Insight Pegasus        |   1   | Automates deployment of AWS EC2 instances (1 control node)                       |
 
-To optimize data input, the Kafka topic is organized into 3 partitions. All 3 Spark Streaming workers consume raw measurement data from 2 unique partitions, and execute MapReduce tasks to calculate battery metrics. The Cassandra database is distributed across an odd number of nodes to enable majority voting, in the case of network downtime, as part of the gossip protcol:
+To optimize data input, the Kafka topic is organized into 3 partitions. All 3 Spark Streaming workers consume raw measurement data from 1 unique partition, and execute MapReduce tasks to calculate battery metrics. The Cassandra database is distributed across an odd number of nodes to enable majority voting, in the case of network downtime, as part of the gossip protcol:
 
 ![Node distribution is optimized for parallel tasks](https://s3.amazonaws.com/arthur-dysart-github-media/chargetracker/cluster_design.png)
 
-ChargeTracker version 1.0 is built on Python 2.7 and processes ca. 2,500 messages per second.
+ChargeTracker version 1.0 is built on Python 2.7 and processes ca. 14,000 events per second (across 100 batteries).
 
 ## Quick Start
 ChargeTracker is executed on a multi-node cluster. Deployment via [Insight Pegasus](https://github.com/InsightDataScience/pegasus) on [AWS Cloud EC2](https://aws.amazon.com/ec2/) is recommended. The project documentation includes detailed instructions for [cluster setup](doc/cluster_setup.md) and [manual installation](doc/manual_install.md).
@@ -99,7 +99,6 @@ From local computer, open the live GUI dashboard:
 ```
 python -m webbrowser http://mybatteries.live
 ```
-
 
 ## Credits
 ChargeTracker was developed by Arthur Dysart, inspired by automation needs in the battery research community. This project was created as part of the [2018 Insight Data Engineering Fellowship](https://www.insightdataengineering.com/) program.

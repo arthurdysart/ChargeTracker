@@ -1,3 +1,15 @@
+# Kafka Connect file sink config file
+# Settings configured for "Charge Tracker" Project by Arthur Dysart.
+# https://github.com/arthurdysart/ChargeTracker 
+#
+# INSTRUCTIONS
+# 1. Set the following parameters for your cluster:
+#     - file (line 35)
+#     - topics (line 36)
+# 2. Upload updated connect-file-sink.properties to correct directory on each cluster node.
+# 3. Start Kafka Connect service from master node.
+#
+# LICENSE
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -16,5 +28,5 @@
 name=local-file-sink
 connector.class=FileStreamSink
 tasks.max=1
-file=/home/ubuntu/overview/src/kafka/battery_stdout.txt
-topics=battery_data
+file=<path-to-stdout>
+topics=<kafka-topic-name>

@@ -6,7 +6,7 @@ ChargeTracker: Near real-time analysis of rechargeable battery systems
 
 When possible, installation via the [quick start guide](../README.md#quick-start) is recommended as the following instructions have been automated using [Insight Pegasus](https://github.com/InsightDataScience/pegasus).
 
-All technologies and their dependencies must be manually installed on each cluster node. Instructions for Cassandra, Kafka, and Spark installation are available via [Insight Data Science: Engineering Ecosystem](https://github.com/InsightDataScience/data-engineering-ecosystem/wiki).
+Without Pegasus, all technologies and their dependencies must be manually installed on each cluster node. Instructions for Cassandra, Kafka, and Spark installation are available via [Insight Data Science: Engineering Ecosystem](https://github.com/InsightDataScience/data-engineering-ecosystem/wiki).
 
 From the Cassandra master node, initiate the Cassandra service (stores calculated metrics):
 ```
